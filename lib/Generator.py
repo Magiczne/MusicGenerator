@@ -10,6 +10,7 @@ class Generator:
         self.metre: Tuple[int, int] = (4, 4)
         self.bar_count: int = 4
         self.shortest_note_duration: int = 16
+        self.available_lenghts: List[int] = [16, 8, 4, 2, 1]
 
         # Parametry melodii
         self.start_note: Note = Note('c', OctaveType.SMALL)
@@ -44,7 +45,11 @@ class Generator:
         Args:
             bar_count:  Bar count
         """
-        # TODO: Set bar count
+        if bar_count >= 1:
+            self.bar_count = bar_count
+        else:
+            raise ValueError()
+
         return self
 
     def set_shortest_note_duration(self, duration: int):
@@ -54,7 +59,11 @@ class Generator:
         Args:
             duration:   Shortest note duration
         """
-        # TODO: Set
+        if duration in self.available_lenghts:
+            self.shortest_note_duration = duration
+        else:
+            raise ValueError()
+
         return self
 
     def set_start_note(self, note: Note):
@@ -64,7 +73,7 @@ class Generator:
         Args:
             note:   Starting note
         """
-        # TODO: Set & Walidacja czy poprawna nuta
+        self.start_note = note
         return self
 
     def set_end_note(self, note: Note):
@@ -74,7 +83,7 @@ class Generator:
         Args:
             note:   Finishing note
         """
-        # TODO: Set & Walidacja czy poprawna nuta
+        self.end_note = note
         return self
 
     def set_ambitus(self, lowest: Optional[Note] = None, highest: Optional[Note] = None):
@@ -85,8 +94,13 @@ class Generator:
              lowest:    Optional value for lowest note
              highest:   Optional value for highest note
         """
-        # TODO: Sprawdzenie czy lowest, highest przy podaniu jest instancją Note
-        # TODO: Ustawienie ambitusu, może opcjonalne parametry, aby ustawiać tylko dół albo tylko górę
+        if lowest is not None:
+            self.ambitus['lowest'] = lowest
+
+        if highest is not None:
+            self.ambitus['highest'] = highest
+               
+        # TODO: opcjonalne parametry, aby ustawiać tylko dół albo tylko górę
         return self
 
     def set_interval_probability(self, interval: str, probability: float):
@@ -97,7 +111,12 @@ class Generator:
             interval:       Interval name
             probability:    Probability for specified interval
         """
-        # TODO: Ustawienie prawdopodobieństwa wystąpienia konkretnego interwału
+        if interval in self.intervals:
+            idx = self.intervals.index(interval)
+            self.probability[idx] = probability
+        else:
+            raise KeyError    
+
         return self
 
     def set_intervals_probability(self, probabilities: List[float]):
@@ -107,8 +126,14 @@ class Generator:
         Args:
             probabilities:  List of probabilities. All values should be summed to 1
         """
-        # TODO: Walidacja czy podano odpowiednio długą listę i czy suma wartości równa się 1
-        # TODO: Ustawienie wszystkich prawdopodobieństw na raz
+        if len(probabilities) == len(self.intervals):
+            if sum(probabilities) == 1:
+                self.probability = probabilities
+            else:
+                raise ValueError 
+        else:
+            raise ValueError
+
         return self
 
     # endregion
