@@ -35,6 +35,13 @@
 # CMake
 cmake-build-*/
 
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Visual Studio
+.vs/
+
 # Mongo Explorer plugin
 .idea/**/mongoSettings.xml
 
