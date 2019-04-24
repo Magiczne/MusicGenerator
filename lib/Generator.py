@@ -77,7 +77,7 @@ class Generator:
         # TODO: Set & Walidacja czy poprawna nuta
         return self
 
-    def set_ambitus(self, lowest: Optional[Note], highest: Optional[Note]):
+    def set_ambitus(self, lowest: Optional[Note] = None, highest: Optional[Note] = None):
         """
         Set ambitus
 
