@@ -166,6 +166,24 @@ class GeneratorTests(unittest.TestCase):
 
     # endregion
 
+    # region split_to_bars
+
+    # TODO: split_to_bars tests
+
+    # endregion
+
+    # region group_bars
+
+    # TODO: group_bars tests
+
+    # endregion
+
+    # region generate
+
+    # TODO: generate tests
+
+    # endregion
+
 
 if __name__ == "__main__":
     unittest.main()
