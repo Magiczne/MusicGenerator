@@ -11,6 +11,15 @@ class Note:
         self.base_duration = base_duration
         self.modifiers = []
 
+    def __eq__(self, other):
+        return(
+            self.__class__ == other.__class__ and
+            self.note == other.note and
+            self.octave == other.octave and
+            self.base_duration == other.base_duration and
+            self.modifiers == other.modifiers
+        )
+
     def __str__(self):
         # TODO: Zwrócić reprezentację tekstową nuty uwzględniając modyfikatory
         pass

@@ -21,8 +21,9 @@ class Generator:
         }
 
         # Parametry występowania interwałów
-        # TODO: Czy chodziło o tylko te interwały, czy o taką rozszerzoną opcję: http://i.imgur.com/tEkJT3i.png
-        self.intervals: List[str] = ['1cz', '2m', '2w', '3m', '3w', '4cz', '4zw', '5zmn', '5cz', '6m', '6w', '7m', '7w', '8cz']
+        self.intervals: List[str] = [
+            '1cz', '2m', '2w', '3m', '3w', '4cz', '4zw', '5zmn', '5cz', '6m', '6w', '7m', '7w', '8cz'
+        ]
         self.probability: List[float] = [1 / len(self.intervals) for _ in self.intervals]
 
     # region Setters
