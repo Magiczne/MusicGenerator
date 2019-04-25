@@ -28,14 +28,14 @@ class NoteTests(unittest.TestCase):
     def test_str(self):
         note = lib.Note('c')
         self.assertEqual(
-            note.__str__(),
+            str(note),
             'c4'
         )
 
     def test_str_full(self):
         note = lib.Note('d', lib.OctaveType.GREAT, 16)
         self.assertEqual(
-            note.__str__(),
+            str(note),
             'c,4'
         )
 
@@ -43,8 +43,14 @@ class NoteTests(unittest.TestCase):
         note = lib.Note('d', lib.OctaveType.GREAT, 16)
         note.add_modifier(lib.NoteModifier.TIE)
         self.assertEqual(
-            note.__str__(),
+            str(note),
             'c,4~'
+        )
+
+        note.add_modifier(lib.NoteModifier.DOT)
+        self.assertEqual(
+            str(note),
+            'c,4.~'
         )
 
     # endregion
@@ -82,6 +88,44 @@ class NoteTests(unittest.TestCase):
                 note.get_duration(length),
                 length / 4 + length / 8 + length / 16
             )
+
+    # endregion
+
+    # region add_modifier / remove modifier
+
+    def test_add_remove_modifier(self):
+        note = lib.Note('c')
+        note.add_modifier(lib.NoteModifier.DOT)
+
+        self.assertTrue(lib.NoteModifier.DOT in note.modifiers)
+
+        note.remove_modifier(lib.NoteModifier.DOT)
+
+        self.assertTrue(lib.NoteModifier.DOT not in note.modifiers)
+
+    def test_add_modifier_unique(self):
+        note = lib.Note('c')
+        note.add_modifier(lib.NoteModifier.DOT)
+        note.add_modifier(lib.NoteModifier.DOT)
+
+        self.assertEqual(len(note.modifiers), 1)
+
+    def test_add_modifier_double_dot_priority_over_dot(self):
+        note = lib.Note('c')
+        note.add_modifier(lib.NoteModifier.DOT)
+        note.add_modifier(lib.NoteModifier.DOUBLE_DOT)
+
+        self.assertTrue(lib.NoteModifier.DOUBLE_DOT in note.modifiers)
+        self.assertTrue(lib.NoteModifier.DOT not in note.modifiers)
+
+    def test_modifiers_order(self):
+        note = lib.Note('c')
+        note.add_modifier(lib.NoteModifier.TIE)
+        note.add_modifier(lib.NoteModifier.DOT)
+
+        self.assertEqual(len(note.modifiers), 2)
+        self.assertEqual(note.modifiers[0], lib.NoteModifier.DOT)
+        self.assertEqual(note.modifiers[1], lib.NoteModifier.TIE)
 
     # endregion
 

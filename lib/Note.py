@@ -43,7 +43,7 @@ class Note:
             modifier:   Modifier to be added
         """
         # TODO: Dodaj modyfikator
-        # TODO: Ustaw modyfikator w odpowiedniej kolejnośći
+        # TODO: Ustaw modyfikator w odpowiedniej kolejnośći - najpierw kropki później tylda, itd...
         return self
 
     def remove_modifier(self, modifier: NoteModifier):
