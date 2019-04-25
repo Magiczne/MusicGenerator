@@ -146,16 +146,19 @@ class GeneratorTests(unittest.TestCase):
     # region set_intervals_probability
 
     def test_set_intervals_probability(self):
-        intervals = self.generator.intervals
-        probabilities = [1 / len(intervals) for _ in intervals]
-        probabilities[0] -= 0.05
-        probabilities[5] += 0.05
+        probabilities = [10, 5, 5, 10, 5, 5, 10, 10, 5, 5, 10, 10, 5, 5]
 
         self.generator.set_intervals_probability(probabilities)
         self.assertEqual(
             self.generator.probability,
             probabilities
         )
+
+    def test_set_intervals_probability_invalid_length(self):
+        probabilities = [0, 1, 2]
+
+        with self.assertRaises(ValueError):
+            self.generator.set_intervals_probability(probabilities)
 
     def test_set_intervals_probability_more_than_one(self):
         intervals = self.generator.intervals

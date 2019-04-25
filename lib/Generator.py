@@ -9,8 +9,10 @@ class Generator:
         # Parametry rytmu
         self.metre: Tuple[int, int] = (4, 4)
         self.bar_count: int = 4
-        self.shortest_note_duration: int = 16
-        self.available_lenghts: List[int] = [16, 8, 4, 2, 1]
+        self.shortest_note_duration: int = 1
+
+        self.available_metre_rhythmic_values: List[int] = [8, 4, 2]
+        self.available_lengths: List[int] = [16, 8, 4, 2, 1]
 
         # Parametry melodii
         self.start_note: Note = Note('c', OctaveType.SMALL)
@@ -24,7 +26,7 @@ class Generator:
         self.intervals: List[str] = [
             '1cz', '2m', '2w', '3m', '3w', '4cz', '4zw', '5zmn', '5cz', '6m', '6w', '7m', '7w', '8cz'
         ]
-        self.probability: List[float] = [1 / len(self.intervals) for _ in self.intervals]
+        self.probability: List[float] = [8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
 
     # region Setters
 
@@ -34,9 +36,13 @@ class Generator:
 
         Args:
             n:  Number of notes
-            m:  Note rytmical value
+            m:  Note rhythmic value
         """
-        self.metre = (n, m)
+        if m in self.available_metre_rhythmic_values:
+            self.metre = (n, m)
+        else:
+            raise ValueError()
+
         return self
 
     def set_bar_count(self, bar_count: int):
@@ -60,7 +66,7 @@ class Generator:
         Args:
             duration:   Shortest note duration
         """
-        if duration in self.available_lenghts:
+        if duration in self.available_lengths:
             self.shortest_note_duration = duration
         else:
             raise ValueError()
@@ -100,8 +106,7 @@ class Generator:
 
         if highest is not None:
             self.ambitus['highest'] = highest
-               
-        # TODO: opcjonalne parametry, aby ustawiać tylko dół albo tylko górę
+
         return self
 
     def set_interval_probability(self, interval: str, probability: float):
@@ -125,10 +130,10 @@ class Generator:
         Set probabilities for all intervals at once
 
         Args:
-            probabilities:  List of probabilities. All values should be summed to 1
+            probabilities:  List of probabilities. All values should be summed to 100
         """
         if len(probabilities) == len(self.intervals):
-            if sum(probabilities) == 1:
+            if sum(probabilities) == 100:
                 self.probability = probabilities
             else:
                 raise ValueError 
