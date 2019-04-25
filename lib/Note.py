@@ -1,15 +1,15 @@
+from typing import List
+
 from .NoteModifier import NoteModifier
 from .OctaveType import OctaveType
 
 
 class Note:
-    def __init__(self, note, octave=OctaveType.SMALL, base_duration=4):
-        # TODO: Walidacja czy octave jest instancją Octave
-
-        self.note = note
-        self.octave = octave
-        self.base_duration = base_duration
-        self.modifiers = []
+    def __init__(self, note: str, octave: OctaveType = OctaveType.SMALL, base_duration: int = 4):
+        self.note: str = note
+        self.octave: OctaveType = octave
+        self.base_duration: int = base_duration
+        self.modifiers: List[NoteModifier] = []
 
     def __eq__(self, other):
         return(
@@ -24,7 +24,7 @@ class Note:
         # TODO: Zwrócić reprezentację tekstową nuty uwzględniając modyfikatory
         pass
 
-    def get_duration(self, minimum_note_length: int = 16):
+    def get_duration(self, minimum_note_length: int = 16) -> int:
         """
         Get note value in the minumum_note_length count
 
