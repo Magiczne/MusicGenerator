@@ -1,3 +1,4 @@
+from typing import List
 import unittest
 import lib
 
@@ -171,19 +172,55 @@ class GeneratorTests(unittest.TestCase):
 
     # region split_to_bars
 
-    # TODO: split_to_bars tests
+    def test_split_to_bars(self):
+        notes: List[lib.Writeable] = [lib.Note('c')] * 7
+        notes.append(lib.Rest())
+
+        expected: List[List[lib.Writeable]] = [
+            [lib.Note('c')] * 4,
+            [lib.Note('c'), lib.Note('c'), lib.Note('c'), lib.Rest()]
+        ]
+
+        bars: List[List[lib.Writeable]] = self.generator.split_to_bars(notes)
+
+        self.assertEqual(bars, expected)
+
+    def test_split_to_bars_with_break(self):
+        notes: List[lib.Writeable] = [
+            lib.Note('c'), lib.Note('c', base_duration=2), lib.Note('c', base_duration=2),
+            lib.Note('c', base_duration=2), lib.Rest()
+        ]
+
+        with_tie = lib.Note('c')
+        with_tie.add_modifier(lib.NoteModifier.TIE)
+
+        expected: List[List[lib.Writeable]] = [
+            [lib.Note('c'), lib.Note('c', base_duration=2), with_tie],
+            [lib.Note('c'), lib.Note('c', base_duration=2), lib.Rest()]
+        ]
+
+        bars: List[List[lib.Writeable]] = self.generator.split_to_bars(notes)
+
+        self.assertEqual(bars, expected)
 
     # endregion
 
     # region group_bars
 
-    # TODO: group_bars tests
+    def test_group_bars_4_4(self):
+        bars: List[List[lib.Writeable]] = [
+            lib.Note('c'), lib.Note('c', base_duration=2), lib.Note('c')
+        ]
 
-    # endregion
+        with_tie = lib.Note('c')
+        with_tie.add_modifier(lib.NoteModifier.TIE)
+        expected: List[List[lib.Writeable]] = [
+            [lib.Note('c'), with_tie, lib.Note('c'), lib.Note('c')]
+        ]
 
-    # region generate
+        grouped_bars: List[List[lib.Writeable]] = self.generator.group_bars(bars)
 
-    # TODO: generate tests
+        self.assertEqual(grouped_bars, expected)
 
     # endregion
 
