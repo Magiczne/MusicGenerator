@@ -6,4 +6,3 @@ class NoteModifier(Enum):
     DOUBLE_DOT = '..'
 
     TIE = '~'
-    pass

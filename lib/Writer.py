@@ -11,6 +11,9 @@ class Writer:
         self.filename: str = filename
         self.lines: List[str] = []
 
+        self.source_dir = 'output/source'
+        self.compiled_dir = 'output/compiled'
+
     # region Data appending utils
 
     def blank(self):
@@ -39,7 +42,7 @@ class Writer:
         indent_str = self.get_indent(indent)
         self.lines.append('{}\\{}'.format(indent_str, data))
 
-    def block_start(self, name: Optional[str], indent: int = 0):
+    def block_start(self, name: Optional[str] = None, indent: int = 0):
         """
         Add block start with optional block name to the output data
 
@@ -147,16 +150,46 @@ class Writer:
 
     # region File operations
 
+    def set_source_dir(self, source_dir: str):
+        """
+        Set directory for generated lilypond sources
+
+        Args:
+            source_dir:     Directory path
+        """
+        self.source_dir = source_dir.rstrip('/')
+
+    def set_compiled_dir(self, compiled_dir: str):
+        """
+        Set directory for compiled lilypond files
+
+        Args:
+            compiled_dir:   Directory path
+        """
+        self.compiled_dir = compiled_dir.rstrip('/')
+
     def export(self):
         """Export lilypond file"""
+        if not os.path.isdir(self.source_dir):
+            os.makedirs(self.source_dir, exist_ok=True)
+
         content: str = '\n'.join(self.lines)
-        f = open('output/source/{}.ly'.format(self.filename), 'w+')
+        f = open('{}/{}.ly'.format(self.source_dir, self.filename), 'w+')
         f.write(content)
         f.close()
 
     def compile(self):
         """Compile lilypond file to pdf"""
-        os.system('lilypond -o output/compiled output/source/{}.ly'.format(self.filename))
+        if not os.path.isdir(self.source_dir):
+            raise NotADirectoryError
+
+        if not os.path.exists('{}/{}.ly'.format(self.source_dir, self.filename)):
+            raise FileNotFoundError
+
+        if not os.path.isdir(self.compiled_dir):
+            os.makedirs(self.compiled_dir, exist_ok=True)
+
+        os.system('lilypond -o {} {}/{}.ly'.format(self.compiled_dir, self.source_dir, self.filename))
 
     # endregion
 
