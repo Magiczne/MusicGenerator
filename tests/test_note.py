@@ -11,7 +11,7 @@ class NoteTests(unittest.TestCase):
         self.assertEqual(note.note, 'c')
         self.assertEqual(note.octave, lib.OctaveType.LINE_1)
         self.assertEqual(note.base_duration, 8)
-        self.assertEqual(note.modifiers, None)
+        self.assertEqual(note.modifiers, [])
 
     def test_init_invalid_note(self):
         with self.assertRaises(ValueError):

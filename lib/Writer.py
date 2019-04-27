@@ -3,7 +3,7 @@ import os
 
 from .BarType import BarType
 from .KeyType import KeyType
-from .Note import Note
+from .Writeable import Writeable
 
 
 class Writer:
@@ -193,7 +193,7 @@ class Writer:
 
     # endregion
 
-    def parse(self, bars: List[List[Note]]):
+    def parse(self, bars: List[List[Writeable]]):
         """
         Parse list of bars and place it into the output data.
 

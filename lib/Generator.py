@@ -2,6 +2,7 @@ from typing import Dict, List, Optional, Tuple
 
 from .OctaveType import OctaveType
 from .Note import Note
+from .Writeable import Writeable
 
 
 class Generator:
@@ -144,7 +145,7 @@ class Generator:
 
     # endregion
 
-    def split_to_bars(self, notes: List[Note]) -> List[List[Note]]:
+    def split_to_bars(self, notes: List[Writeable]) -> List[List[Writeable]]:
         """
         Split given list of notes into bars. Notes that overlap between bars will be split
         and then connected with a ligature.
@@ -159,7 +160,7 @@ class Generator:
         # TODO: Implementacja pogrupowania nut w takty, złamanie odpowiednich nut łukiem, etc...
         pass
 
-    def group_bars(self, bars: List[List[Note]]) -> List[List[Note]]:
+    def group_bars(self, bars: List[List[Writeable]]) -> List[List[Writeable]]:
         """
         Perform grouping on each bar of notes according to the musical grouping rules
 
@@ -172,7 +173,7 @@ class Generator:
         # TODO: Implementacja grupowania nut wewnątrz taktów według zasad grupowania zależnie od metrum
         pass
 
-    def generate(self) -> List[Note]:
+    def generate(self) -> List[Writeable]:
         """
         Generate list of notes based on previously set parameters.
 

@@ -2,9 +2,10 @@ from typing import List
 
 from .NoteModifier import NoteModifier
 from .OctaveType import OctaveType
+from .Writeable import Writeable
 
 
-class Note:
+class Note(Writeable):
     def __init__(self, note: str, octave: OctaveType = OctaveType.SMALL, base_duration: int = 4):
         self.note: str = note
         self.octave: OctaveType = octave
@@ -29,7 +30,10 @@ class Note:
         Get note value in the minumum_note_length count
 
         Args:
-            minimum_note_length:    Minimum note length in which we want the duration
+            minimum_note_length:    Minimum note length in which we duration will be calculated
+
+        Returns:
+            Note duration in the minimum_note_length count
         """
         # TODO: Zwrócić aktualną długość nuty, zwracając uwagi na kropkę i podwójną kropkę,
         # Licząc na podstawie wartości podanej w parametrze minimum_note_length

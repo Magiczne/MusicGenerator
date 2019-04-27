@@ -154,3 +154,7 @@ class WriterTests(unittest.TestCase):
     def test_parse(self):
         # TODO
         pass
+
+
+if __name__ == '__main__':
+    unittest.main()
