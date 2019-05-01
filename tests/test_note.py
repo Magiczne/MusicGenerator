@@ -36,7 +36,7 @@ class NoteTests(unittest.TestCase):
         note = lib.Note('d', lib.OctaveType.GREAT, 16)
         self.assertEqual(
             str(note),
-            'c,4'
+            'd,16'
         )
 
     def test_str_with_modifiers(self):
@@ -44,13 +44,13 @@ class NoteTests(unittest.TestCase):
         note.add_modifier(lib.NoteModifier.TIE)
         self.assertEqual(
             str(note),
-            'c,4~'
+            'd,16~'
         )
 
         note.add_modifier(lib.NoteModifier.DOT)
         self.assertEqual(
             str(note),
-            'c,4.~'
+            'd,16.~'
         )
 
     # endregion

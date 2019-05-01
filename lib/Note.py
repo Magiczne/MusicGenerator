@@ -8,8 +8,12 @@ from .Writeable import Writeable
 class Note(Writeable):
     def __init__(self, note: str, octave: OctaveType = OctaveType.SMALL, base_duration: int = 4):
         super().__init__(base_duration)
-
-        self.note: str = note
+        self.available_notes: List[str] = ['c', 'd', 'e', 'f', 'g', 'a', 'h']
+        # TODO: przeniesc liste mozliwych nut
+        if note in self.available_notes:
+            self.note: str = note
+        else:
+            raise ValueError
         self.octave: OctaveType = octave
         self.modifiers: List[NoteModifier] = []
 
@@ -23,9 +27,11 @@ class Note(Writeable):
         )
 
     def __str__(self):
-        return '{self.note}{self.octave}{self.base_duration}{self.modifiers}'
+        mods = ''.join([mod.value for mod in self.modifiers])
+        octv = self.octave.value
+        return f'{self.note}{octv}{self.base_duration}{mods}'
 
-    def get_duration(self, minimum_note_length: int = 16) -> int:
+    def get_duration(self, minimum_note_length: int = 16) -> float:
         """
         Get note value in the minimum_note_length count
 
@@ -35,7 +41,7 @@ class Note(Writeable):
         Returns:
             Note duration in the minimum_note_length count
         """
-        note_duration = minimum_note_length // self.base_duration
+        note_duration = minimum_note_length / self.base_duration
         if NoteModifier.DOT in self.modifiers:
             note_duration = note_duration * 1.5
         elif NoteModifier.DOUBLE_DOT in self.modifiers:
@@ -49,14 +55,23 @@ class Note(Writeable):
         Args:
             modifier:   Modifier to be added
         """
-        self.modifiers.append(modifier)
+        if modifier == NoteModifier.TIE:
+            if NoteModifier.TIE in self.modifiers:
+                self.modifiers.remove(NoteModifier.TIE)
+
         if modifier == NoteModifier.DOUBLE_DOT:
             if NoteModifier.DOT in self.modifiers:
                 self.modifiers.remove(NoteModifier.DOT)
+            elif NoteModifier.DOUBLE_DOT in self.modifiers:
+                self.modifiers.remove(NoteModifier.DOUBLE_DOT)
 
         if modifier == NoteModifier.DOT:
             if NoteModifier.DOUBLE_DOT in self.modifiers:
                 self.modifiers.remove(NoteModifier.DOUBLE_DOT)
+            elif NoteModifier.DOT in self.modifiers:
+                self.modifiers.remove(NoteModifier.DOT)
+
+        self.modifiers.append(modifier)
 
         if NoteModifier.TIE in self.modifiers:
             self.modifiers.remove(NoteModifier.TIE)

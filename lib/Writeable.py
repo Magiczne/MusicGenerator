@@ -5,6 +5,7 @@ from typing import List
 class Writeable(abc.ABC):
     def __init__(self, base_duration: int = 4):
         self.available_lengths: List[int] = [16, 8, 4, 2, 1]
+        # TODO: przeniesc liste mozliwych wartosci
         if base_duration in self.available_lengths:
             self.base_duration: int = base_duration
         else:
