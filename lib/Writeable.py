@@ -13,7 +13,7 @@ class Writeable(abc.ABC):
         super().__init__()
 
     @abc.abstractmethod
-    def get_duration(self, minimum_note_length: int = 16) -> int:
+    def get_duration(self, minimum_note_length: int = 16) -> float:
         """
         Get note value in the minimum_note_length count
 
