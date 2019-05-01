@@ -23,22 +23,24 @@ class Note(Writeable):
         )
 
     def __str__(self):
-        # TODO: Zwrócić reprezentację tekstową nuty uwzględniając modyfikatory
-        pass
+        return '{self.note}{self.octave}{self.base_duration}{self.modifiers}'
 
     def get_duration(self, minimum_note_length: int = 16) -> int:
         """
         Get note value in the minimum_note_length count
 
         Args:
-            minimum_note_length:    Minimum note length in which we duration will be calculated
+            minimum_note_length:    Minimum note length in which the duration will be calculated
 
         Returns:
             Note duration in the minimum_note_length count
         """
-        # TODO: Zwrócić aktualną długość nuty, zwracając uwagi na kropkę i podwójną kropkę,
-        # Licząc na podstawie wartości podanej w parametrze minimum_note_length
-        pass
+        note_duration = minimum_note_length // self.base_duration
+        if NoteModifier.DOT in self.modifiers:
+            note_duration = note_duration * 1.5
+        elif NoteModifier.DOUBLE_DOT in self.modifiers:
+            note_duration = note_duration * 1.75
+        return note_duration
 
     def add_modifier(self, modifier: NoteModifier):
         """
@@ -47,8 +49,19 @@ class Note(Writeable):
         Args:
             modifier:   Modifier to be added
         """
-        # TODO: Dodaj modyfikator
-        # TODO: Ustaw modyfikator w odpowiedniej kolejnośći - najpierw kropki później tylda, itd...
+        self.modifiers.append(modifier)
+        if modifier == NoteModifier.DOUBLE_DOT:
+            if NoteModifier.DOT in self.modifiers:
+                self.modifiers.remove(NoteModifier.DOT)
+
+        if modifier == NoteModifier.DOT:
+            if NoteModifier.DOUBLE_DOT in self.modifiers:
+                self.modifiers.remove(NoteModifier.DOUBLE_DOT)
+
+        if NoteModifier.TIE in self.modifiers:
+            self.modifiers.remove(NoteModifier.TIE)
+            self.modifiers.append(NoteModifier.TIE)
+
         return self
 
     def remove_modifier(self, modifier: NoteModifier):
@@ -58,5 +71,5 @@ class Note(Writeable):
         Args:
             modifier:   Modifier to be removed
         """
-        # TODO: Usuń modyfikator
+        self.modifiers.remove(modifier)
         return self

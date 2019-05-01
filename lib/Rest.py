@@ -18,10 +18,10 @@ class Rest(Writeable):
         )
 
     def __str__(self):
-        # TODO: Zwrócić reprezentację tekstową pauzy uwzględniając modyfikatory
-        pass
+        mods = ''.join([mod.value for mod in self.modifiers])
+        return f'r{self.base_duration}{mods}'
 
-    def get_duration(self, minimum_note_length: int = 16) -> int:
+    def get_duration(self, minimum_note_length: int = 16) -> float:
         """
         Get note value in the minimum_note_length count
 
@@ -31,9 +31,12 @@ class Rest(Writeable):
         Returns:
             Note duration in the minimum_note_length count
         """
-        # TODO: Zwrócić aktualną długość pauzy, zwracając uwagi na kropkę i podwójną kropkę,
-        # Licząc na podstawie wartości podanej w parametrze minimum_note_length
-        pass
+        rest_duration = minimum_note_length / self.base_duration
+        if RestModifier.DOT in self.modifiers:
+            rest_duration = rest_duration * 1.5
+        elif RestModifier.DOUBLE_DOT in self.modifiers:
+            rest_duration = rest_duration * 1.75
+        return rest_duration
 
     def add_modifier(self, modifier: RestModifier):
         """
@@ -42,8 +45,19 @@ class Rest(Writeable):
         Args:
             modifier:   Modifier to be added
         """
-        # TODO: Dodaj modyfikator
-        # TODO: Jeśli jest kropka i dodawana jest podwójna to usuń pojedynczą
+        if modifier == RestModifier.DOUBLE_DOT:
+            if RestModifier.DOT in self.modifiers:
+                self.modifiers.remove(RestModifier.DOT)
+            elif RestModifier.DOUBLE_DOT in self.modifiers:
+                self.modifiers.remove(RestModifier.DOUBLE_DOT)
+
+        if modifier == RestModifier.DOT:
+            if RestModifier.DOUBLE_DOT in self.modifiers:
+                self.modifiers.remove(RestModifier.DOUBLE_DOT)
+            elif RestModifier.DOT in self.modifiers:
+                self.modifiers.remove(RestModifier.DOT)
+
+        self.modifiers.append(modifier)
         return self
 
     def remove_modifier(self, modifier: RestModifier):
@@ -53,5 +67,5 @@ class Rest(Writeable):
         Args:
             modifier:   Modifier to be removed
         """
-        # TODO: Usuń modyfikator
+        self.modifiers.remove(modifier)
         return self

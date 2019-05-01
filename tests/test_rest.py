@@ -15,13 +15,12 @@ class RestTests(unittest.TestCase):
 
     def test_str(self):
         rest = lib.Rest(base_duration=8)
-        rest.add_modifier(lib.RestModifier.DOT)
         self.assertEqual(str(rest), 'r8')
 
     def test_str_with_modifiers(self):
         rest = lib.Rest()
         rest.add_modifier(lib.RestModifier.DOUBLE_DOT)
-        self.assertEqual(str(rest), 'r4.')
+        self.assertEqual(str(rest), 'r4..')
 
     def test_get_duration(self):
         rest = lib.Rest()
