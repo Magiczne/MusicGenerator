@@ -156,7 +156,6 @@ class Generator:
         Returns:
             List of bars of notes
         """
-        # TODO: Sprawdzenie czy parametr notes jest listą nut
         # TODO: Implementacja pogrupowania nut w takty, złamanie odpowiednich nut łukiem, etc...
         pass
 

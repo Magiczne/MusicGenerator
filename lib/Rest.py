@@ -6,7 +6,8 @@ from .Writeable import Writeable
 
 class Rest(Writeable):
     def __init__(self, base_duration: int = 4):
-        self.base_duration: int = base_duration
+        super().__init__(base_duration)
+
         self.modifiers: List[RestModifier] = []
 
     def __eq__(self, other):
@@ -22,14 +23,17 @@ class Rest(Writeable):
 
     def get_duration(self, minimum_note_length: int = 16) -> int:
         """
-        Get rest value in the minimum_note_length count
+        Get note value in the minimum_note_length count
 
         Args:
             minimum_note_length:    Minimum note length in which we duration will be calculated
 
         Returns:
-            Rest duration in the minimum_note_length count
+            Note duration in the minimum_note_length count
         """
+        # TODO: Zwrócić aktualną długość pauzy, zwracając uwagi na kropkę i podwójną kropkę,
+        # Licząc na podstawie wartości podanej w parametrze minimum_note_length
+        pass
 
     def add_modifier(self, modifier: RestModifier):
         """
