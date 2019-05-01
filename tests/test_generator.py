@@ -7,6 +7,19 @@ class GeneratorTests(unittest.TestCase):
     def setUp(self):
         self.generator = lib.Generator()
 
+    def test_init(self):
+        self.assertEqual(self.generator.metre, (4, 4))
+        self.assertEqual(self.generator.bar_count, 4)
+        self.assertEqual(self.generator.shortest_note_duration, 4)
+
+        self.assertEqual(self.generator.start_note, lib.Note('c', lib.OctaveType.SMALL))
+        self.assertEqual(self.generator.end_note, lib.Note('c', lib.OctaveType.LINE_1))
+        self.assertEqual(self.generator.ambitus['lowest'], lib.Note('c', lib.OctaveType.SMALL))
+        self.assertEqual(self.generator.ambitus['highest'], lib.Note('c', lib.OctaveType.LINE_1))
+        self.assertEqual(sum(self.generator.probability), 100)
+
+    # region Setters
+
     # region set_metre
 
     def test_set_metre(self):
@@ -170,6 +183,43 @@ class GeneratorTests(unittest.TestCase):
 
     # endregion
 
+    # endregion
+
+    # region Utility methods
+
+    def test_get_random_writeable(self):
+        for i in range(10):
+            writeable = self.generator.get_random_writeable(8)
+            self.assertLessEqual(writeable.get_duration(self.generator.shortest_note_duration))
+
+    def test_get_random_note(self):
+        note = self.generator.get_random_note('d', lib.OctaveType.LINE_5)
+        self.assertEqual(note.note, 'd')
+        self.assertEqual(note.octave, lib.OctaveType.LINE_5)
+
+    def test_last_note_idx(self):
+        self.generator.generated_data = [lib.Rest(), lib.Rest(), lib.Note('c'), lib.Rest()]
+        idx = self.generator.get_last_note_idx()
+        self.assertEqual(idx, 2)
+
+        self.generator.generated_data = [lib.Rest(), lib.Rest(), lib.Rest(), lib.Rest()]
+        idx = self.generator.get_last_note_idx()
+        self.assertEqual(idx, -1)
+
+    def test_get_length_to_fill(self):
+        self.generator.set_bar_count(1)
+        self.generator.set_metre(4, 4)
+        self.generator.set_shortest_note_duration(4)
+        self.assertEqual(self.generator.get_length_to_fill(), 4)
+
+        self.generator.set_bar_count(2)
+        self.assertEqual(self.generator.get_length_to_fill(), 8)
+
+        self.generator.set_shortest_note_duration(8)
+        self.assertEqual(self.generator.get_length_to_fill(), 16)
+
+    # endregion
+
     # region split_to_bars
 
     def test_split_to_bars(self):
@@ -221,6 +271,43 @@ class GeneratorTests(unittest.TestCase):
         grouped_bars: List[List[lib.Writeable]] = self.generator.group_bars(bars)
 
         self.assertEqual(grouped_bars, expected)
+
+    # endregion
+
+    # region generate
+
+    def test_generate(self):
+        data: List[lib.Writeable] = self.generator.generate()
+
+        first_note: lib.Note = data[0]
+        last_note: lib.Note = data[self.generator.get_last_note_idx()]
+
+        # Check start and end note
+        self.assertEqual(first_note.note, self.generator.start_note.note)
+        self.assertEqual(first_note.octave, self.generator.start_note.octave)
+
+        last_note_idx = self.generator.get_last_note_idx()
+        self.assertEqual(last_note.note, self.generator.end_note.note)
+        self.assertEqual(last_note.note, self.generator.end_note.octave)
+
+        # Check length
+        expected_length = self.generator.get_length_to_fill()
+        actual_length = sum([item.get_duration(self.generator.shortest_note_duration) for item in data])
+        self.assertEqual(expected_length, actual_length)
+
+        # Check ambitus
+        notes = [item for item in data if isinstance(item, lib.Note)]
+        for note in notes:
+            # TODO: Check if each of notes contains in ambitus (except first and last)
+            pass
+
+    def test_generate_group(self):
+        data: List[List[lib.Writeable]] = self.generator.generate(group=True)
+
+        expected_bar_length = self.generator.get_length_to_fill() / self.generator.bar_count
+        for bar in data:
+            actual_length = sum([item.get_duration(self.generator.shortest_note_duration) for item in bar])
+            self.assertEqual(expected_bar_length, actual_length)
 
     # endregion
 
