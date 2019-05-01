@@ -55,23 +55,16 @@ class Note(Writeable):
         Args:
             modifier:   Modifier to be added
         """
-        if modifier == NoteModifier.TIE:
-            if NoteModifier.TIE in self.modifiers:
-                self.modifiers.remove(NoteModifier.TIE)
+        if modifier not in self.modifiers:
+            self.modifiers.append(modifier)
 
         if modifier == NoteModifier.DOUBLE_DOT:
             if NoteModifier.DOT in self.modifiers:
                 self.modifiers.remove(NoteModifier.DOT)
-            elif NoteModifier.DOUBLE_DOT in self.modifiers:
-                self.modifiers.remove(NoteModifier.DOUBLE_DOT)
 
         if modifier == NoteModifier.DOT:
             if NoteModifier.DOUBLE_DOT in self.modifiers:
                 self.modifiers.remove(NoteModifier.DOUBLE_DOT)
-            elif NoteModifier.DOT in self.modifiers:
-                self.modifiers.remove(NoteModifier.DOT)
-
-        self.modifiers.append(modifier)
 
         if NoteModifier.TIE in self.modifiers:
             self.modifiers.remove(NoteModifier.TIE)
