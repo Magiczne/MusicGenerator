@@ -28,8 +28,7 @@ class Note(Writeable):
 
     def __str__(self):
         mods = ''.join([mod.value for mod in self.modifiers])
-        octv = self.octave.value
-        return f'{self.note}{octv}{self.base_duration}{mods}'
+        return f'{self.note}{self.octave.value}{self.base_duration}{mods}'
 
     def get_duration(self, minimum_note_length: int = 16) -> float:
         """
@@ -66,6 +65,8 @@ class Note(Writeable):
             if NoteModifier.DOUBLE_DOT in self.modifiers:
                 self.modifiers.remove(NoteModifier.DOUBLE_DOT)
 
+        # We need to be sure that TIE is last, so in order to do it we first remove it
+        # and then add it again at the end (probably could improve that, but not now).
         if NoteModifier.TIE in self.modifiers:
             self.modifiers.remove(NoteModifier.TIE)
             self.modifiers.append(NoteModifier.TIE)

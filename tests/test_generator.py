@@ -8,15 +8,15 @@ class GeneratorTests(unittest.TestCase):
         self.generator = lib.Generator()
 
     def test_init(self):
-        self.assertEqual(self.generator.metre, (4, 4))
-        self.assertEqual(self.generator.bar_count, 4)
-        self.assertEqual(self.generator.shortest_note_duration, 4)
+        self.assertEqual((4, 4), self.generator.metre)
+        self.assertEqual(4, self.generator.bar_count)
+        self.assertEqual(4, self.generator.shortest_note_duration)
 
-        self.assertEqual(self.generator.start_note, lib.Note('c', lib.OctaveType.SMALL))
-        self.assertEqual(self.generator.end_note, lib.Note('c', lib.OctaveType.LINE_1))
-        self.assertEqual(self.generator.ambitus['lowest'], lib.Note('c', lib.OctaveType.SMALL))
-        self.assertEqual(self.generator.ambitus['highest'], lib.Note('c', lib.OctaveType.LINE_1))
-        self.assertEqual(sum(self.generator.probability), 100)
+        self.assertEqual(lib.Note('c', lib.OctaveType.SMALL), self.generator.start_note)
+        self.assertEqual(lib.Note('c', lib.OctaveType.LINE_1), self.generator.end_note)
+        self.assertEqual(lib.Note('c', lib.OctaveType.SMALL), self.generator.ambitus['lowest'])
+        self.assertEqual(lib.Note('c', lib.OctaveType.LINE_1), self.generator.ambitus['highest'])
+        self.assertEqual(100, sum(self.generator.probability))
 
     # region Setters
 
@@ -24,10 +24,7 @@ class GeneratorTests(unittest.TestCase):
 
     def test_set_metre(self):
         self.generator.set_metre(4, 4)
-        self.assertEqual(
-            self.generator.metre,
-            (4, 4)
-        )
+        self.assertEqual((4, 4), self.generator.metre)
 
     def test_invalid_metre(self):
         with self.assertRaises(ValueError):
@@ -39,10 +36,7 @@ class GeneratorTests(unittest.TestCase):
 
     def test_set_bar_count(self):
         self.generator.set_bar_count(16)
-        self.assertEqual(
-            self.generator.bar_count,
-            16
-        )
+        self.assertEqual(16, self.generator.bar_count)
 
     def test_invalid_bar_count(self):
         with self.assertRaises(ValueError):
@@ -54,10 +48,7 @@ class GeneratorTests(unittest.TestCase):
 
     def test_set_shortest_note_duration(self):
         self.generator.set_shortest_note_duration(8)
-        self.assertEqual(
-            self.generator.shortest_note_duration,
-            8
-        )
+        self.assertEqual(8, self.generator.shortest_note_duration)
 
     def test_set_invalid_note_duration(self):
         with self.assertRaises(ValueError):
@@ -70,10 +61,7 @@ class GeneratorTests(unittest.TestCase):
     def test_set_start_note(self):
         note = lib.Note('c')
         self.generator.set_start_note(note)
-        self.assertEqual(
-            self.generator.start_note,
-            note
-        )
+        self.assertEqual(note, self.generator.start_note)
 
     # endregion
 
@@ -82,10 +70,7 @@ class GeneratorTests(unittest.TestCase):
     def test_set_end_note(self):
         note = lib.Note('c')
         self.generator.set_end_note(note)
-        self.assertEqual(
-            self.generator.end_note,
-            note
-        )
+        self.assertEqual(note, self.generator.end_note)
 
     # endregion
 
@@ -93,67 +78,40 @@ class GeneratorTests(unittest.TestCase):
 
     def test_set_ambitus_no_params(self):
         self.generator.set_ambitus()
-        self.assertEqual(
-            self.generator.ambitus['lowest'],
-            lib.Note('c', lib.OctaveType.SMALL)
-        )
-        self.assertEqual(
-            self.generator.ambitus['highest'],
-            lib.Note('c', lib.OctaveType.LINE_1)
-        )
+        self.assertEqual(lib.Note('c', lib.OctaveType.SMALL), self.generator.ambitus['lowest'])
+        self.assertEqual(lib.Note('c', lib.OctaveType.LINE_1), self.generator.ambitus['highest'])
 
     def test_set_ambitus_lowest(self):
         note = lib.Note('c')
         self.generator.set_ambitus(lowest=note)
-        self.assertEqual(
-            self.generator.ambitus['lowest'],
-            note
-        )
-        self.assertEqual(
-            self.generator.ambitus['highest'],
-            lib.Note('c', lib.OctaveType.LINE_1)
-        )
+        self.assertEqual(note, self.generator.ambitus['lowest'])
+        self.assertEqual(lib.Note('c', lib.OctaveType.LINE_1), self.generator.ambitus['highest'])
 
     def test_set_ambitus_highest(self):
         note = lib.Note('c')
         self.generator.set_ambitus(highest=note)
-        self.assertEqual(
-            self.generator.ambitus['lowest'],
-            lib.Note('c', lib.OctaveType.SMALL)
-        )
-        self.assertEqual(
-            self.generator.ambitus['highest'],
-            note
-        )
+        self.assertEqual(lib.Note('c', lib.OctaveType.SMALL), self.generator.ambitus['lowest'])
+        self.assertEqual(note, self.generator.ambitus['highest'])
 
     def test_set_ambitus(self):
         lowest = lib.Note('d')
         highest = lib.Note('e')
         self.generator.set_ambitus(lowest=lowest, highest=highest)
-        self.assertEqual(
-            self.generator.ambitus['lowest'],
-            lowest
-        )
-        self.assertEqual(
-            self.generator.ambitus['highest'],
-            highest
-        )
+        self.assertEqual(lowest, self.generator.ambitus['lowest'])
+        self.assertEqual(highest, self.generator.ambitus['highest'])
 
     # endregion
 
     # region set_interval_probability
 
     def test_set_interval_probability(self):
-        self.generator.set_interval_probability('1cz', 0.1)
+        self.generator.set_interval_probability('1cz', 10)
         idx = self.generator.intervals.index('1cz')
-        self.assertEqual(
-            self.generator.probability[idx],
-            0.1
-        )
+        self.assertEqual(10, self.generator.probability[idx])
 
     def test_set_invalid_interval_name(self):
         with self.assertRaises(KeyError):
-            self.generator.set_interval_probability('1czz', 0.1)
+            self.generator.set_interval_probability('1czz', 10)
 
     # endregion
 
@@ -163,10 +121,7 @@ class GeneratorTests(unittest.TestCase):
         probabilities = [10, 5, 5, 10, 5, 5, 10, 10, 5, 5, 10, 10, 5, 5]
 
         self.generator.set_intervals_probability(probabilities)
-        self.assertEqual(
-            self.generator.probability,
-            probabilities
-        )
+        self.assertEqual(probabilities, self.generator.probability)
 
     def test_set_intervals_probability_invalid_length(self):
         probabilities = [0, 1, 2]
@@ -190,33 +145,33 @@ class GeneratorTests(unittest.TestCase):
     def test_get_random_writeable(self):
         for i in range(10):
             writeable = self.generator.get_random_writeable(8)
-            self.assertLessEqual(writeable.get_duration(self.generator.shortest_note_duration))
+            self.assertLessEqual(writeable.get_duration(self.generator.shortest_note_duration), 8)
 
     def test_get_random_note(self):
         note = self.generator.get_random_note('d', lib.OctaveType.LINE_5)
-        self.assertEqual(note.note, 'd')
-        self.assertEqual(note.octave, lib.OctaveType.LINE_5)
+        self.assertEqual('d', note.note)
+        self.assertEqual(lib.OctaveType.LINE_5, note.octave)
 
     def test_last_note_idx(self):
         self.generator.generated_data = [lib.Rest(), lib.Rest(), lib.Note('c'), lib.Rest()]
         idx = self.generator.get_last_note_idx()
-        self.assertEqual(idx, 2)
+        self.assertEqual(2, idx)
 
         self.generator.generated_data = [lib.Rest(), lib.Rest(), lib.Rest(), lib.Rest()]
         idx = self.generator.get_last_note_idx()
-        self.assertEqual(idx, -1)
+        self.assertEqual(-1, idx)
 
     def test_get_length_to_fill(self):
         self.generator.set_bar_count(1)
         self.generator.set_metre(4, 4)
         self.generator.set_shortest_note_duration(4)
-        self.assertEqual(self.generator.get_length_to_fill(), 4)
+        self.assertEqual(4, self.generator.get_length_to_fill())
 
         self.generator.set_bar_count(2)
-        self.assertEqual(self.generator.get_length_to_fill(), 8)
+        self.assertEqual(8, self.generator.get_length_to_fill())
 
         self.generator.set_shortest_note_duration(8)
-        self.assertEqual(self.generator.get_length_to_fill(), 16)
+        self.assertEqual(16, self.generator.get_length_to_fill())
 
     # endregion
 
@@ -233,7 +188,7 @@ class GeneratorTests(unittest.TestCase):
 
         bars: List[List[lib.Writeable]] = self.generator.split_to_bars(notes)
 
-        self.assertEqual(bars, expected)
+        self.assertEqual(expected, bars)
 
     def test_split_to_bars_with_break(self):
         notes: List[lib.Writeable] = [
@@ -251,7 +206,7 @@ class GeneratorTests(unittest.TestCase):
 
         bars: List[List[lib.Writeable]] = self.generator.split_to_bars(notes)
 
-        self.assertEqual(bars, expected)
+        self.assertEqual(expected, bars)
 
     # endregion
 
@@ -270,7 +225,7 @@ class GeneratorTests(unittest.TestCase):
 
         grouped_bars: List[List[lib.Writeable]] = self.generator.group_bars(bars)
 
-        self.assertEqual(grouped_bars, expected)
+        self.assertEqual(expected, grouped_bars)
 
     # endregion
 
@@ -283,12 +238,12 @@ class GeneratorTests(unittest.TestCase):
         last_note: lib.Note = data[self.generator.get_last_note_idx()]
 
         # Check start and end note
-        self.assertEqual(first_note.note, self.generator.start_note.note)
-        self.assertEqual(first_note.octave, self.generator.start_note.octave)
+        self.assertEqual(self.generator.start_note.note, first_note.note)
+        self.assertEqual(self.generator.start_note.octave, first_note.octave)
 
         last_note_idx = self.generator.get_last_note_idx()
-        self.assertEqual(last_note.note, self.generator.end_note.note)
-        self.assertEqual(last_note.note, self.generator.end_note.octave)
+        self.assertEqual(self.generator.end_note.note, last_note.note)
+        self.assertEqual(self.generator.end_note.octave, last_note.note)
 
         # Check length
         expected_length = self.generator.get_length_to_fill()

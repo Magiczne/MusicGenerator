@@ -8,10 +8,10 @@ class NoteTests(unittest.TestCase):
 
     def test_init(self):
         note = lib.Note('c', lib.OctaveType.LINE_1, 8)
-        self.assertEqual(note.note, 'c')
-        self.assertEqual(note.octave, lib.OctaveType.LINE_1)
-        self.assertEqual(note.base_duration, 8)
-        self.assertEqual(note.modifiers, [])
+        self.assertEqual('c', note.note)
+        self.assertEqual(lib.OctaveType.LINE_1, note.octave)
+        self.assertEqual(8, note.base_duration)
+        self.assertEqual([], note.modifiers)
 
     def test_init_invalid_note(self):
         with self.assertRaises(ValueError):
@@ -27,31 +27,19 @@ class NoteTests(unittest.TestCase):
 
     def test_str(self):
         note = lib.Note('c')
-        self.assertEqual(
-            str(note),
-            'c4'
-        )
+        self.assertEqual('c4', str(note))
 
     def test_str_full(self):
         note = lib.Note('d', lib.OctaveType.GREAT, 16)
-        self.assertEqual(
-            str(note),
-            'd,16'
-        )
+        self.assertEqual('d,16', str(note))
 
     def test_str_with_modifiers(self):
         note = lib.Note('d', lib.OctaveType.GREAT, 16)
         note.add_modifier(lib.NoteModifier.TIE)
-        self.assertEqual(
-            str(note),
-            'd,16~'
-        )
+        self.assertEqual('d,16~', str(note))
 
         note.add_modifier(lib.NoteModifier.DOT)
-        self.assertEqual(
-            str(note),
-            'd,16.~'
-        )
+        self.assertEqual('d,16.~', str(note))
 
     # endregion
 
@@ -62,10 +50,7 @@ class NoteTests(unittest.TestCase):
         lengths = [64, 32, 16, 8, 4, 2, 1]
 
         for length in lengths:
-            self.assertEqual(
-                note.get_duration(length),
-                length / 4
-            )
+            self.assertEqual(length / 4, note.get_duration(length))
 
     def test_get_duration_with_dot(self):
         note = lib.Note('c', base_duration=4)
@@ -73,10 +58,7 @@ class NoteTests(unittest.TestCase):
         lengths = [64, 32, 16, 8, 4, 2, 1]
 
         for length in lengths:
-            self.assertEqual(
-                note.get_duration(length),
-                length / 4 + length / 8
-            )
+            self.assertEqual(length / 4 + length / 8, note.get_duration(length))
 
     def test_get_duration_with_double_dot(self):
         note = lib.Note('c', base_duration=4)
@@ -84,10 +66,7 @@ class NoteTests(unittest.TestCase):
         lengths = [64, 32, 16, 8, 4, 2, 1]
 
         for length in lengths:
-            self.assertEqual(
-                note.get_duration(length),
-                length / 4 + length / 8 + length / 16
-            )
+            self.assertEqual(length / 4 + length / 8 + length / 16, note.get_duration(length))
 
     # endregion
 
@@ -96,11 +75,9 @@ class NoteTests(unittest.TestCase):
     def test_add_remove_modifier(self):
         note = lib.Note('c')
         note.add_modifier(lib.NoteModifier.DOT)
-
         self.assertTrue(lib.NoteModifier.DOT in note.modifiers)
 
         note.remove_modifier(lib.NoteModifier.DOT)
-
         self.assertTrue(lib.NoteModifier.DOT not in note.modifiers)
 
     def test_add_modifier_unique(self):
@@ -108,7 +85,7 @@ class NoteTests(unittest.TestCase):
         note.add_modifier(lib.NoteModifier.DOT)
         note.add_modifier(lib.NoteModifier.DOT)
 
-        self.assertEqual(len(note.modifiers), 1)
+        self.assertEqual(1, len(note.modifiers))
 
     def test_add_modifier_double_dot_priority_over_dot(self):
         note = lib.Note('c')
@@ -123,9 +100,9 @@ class NoteTests(unittest.TestCase):
         note.add_modifier(lib.NoteModifier.TIE)
         note.add_modifier(lib.NoteModifier.DOT)
 
-        self.assertEqual(len(note.modifiers), 2)
-        self.assertEqual(note.modifiers[0], lib.NoteModifier.DOT)
-        self.assertEqual(note.modifiers[1], lib.NoteModifier.TIE)
+        self.assertEqual(2, len(note.modifiers))
+        self.assertEqual(lib.NoteModifier.TIE, note.modifiers[1])
+        self.assertEqual(lib.NoteModifier.DOT, note.modifiers[0])
 
     # endregion
 

@@ -10,8 +10,8 @@ class WriterTests(unittest.TestCase):
     # region Data appending utils
 
     def test_init(self):
-        self.assertEqual(self.writer.filename, 'test')
-        self.assertEqual(len(self.writer.lines), 0)
+        self.assertEqual('test', self.writer.filename)
+        self.assertEqual(0, len(self.writer.lines))
 
     def test_line(self):
         self.writer.line('test')
@@ -19,7 +19,7 @@ class WriterTests(unittest.TestCase):
 
         self.writer.line('test', indent=1)
         self.assertIn('\ttest', self.writer.lines)
-        self.assertEqual(self.writer.lines[1], '\ttest')
+        self.assertEqual('\ttest', self.writer.lines[1])
 
     def test_command(self):
         self.writer.command('test')
@@ -51,7 +51,7 @@ class WriterTests(unittest.TestCase):
 
     def test_get_bar(self):
         bar = lib.BarType.DOUBLE_WIDE
-        self.assertEqual(self.writer.get_bar(bar), '\\bar ".."')
+        self.assertEqual('\\bar ".."', self.writer.get_bar(bar))
 
     # endregion
 
@@ -81,19 +81,19 @@ class WriterTests(unittest.TestCase):
 
     def test_set_source_dir(self):
         self.writer.set_source_dir('test/source')
-        self.assertEqual(self.writer.source_dir, 'test/source')
+        self.assertEqual('test/source', self.writer.source_dir)
 
     def test_set_source_dir_with_trailing_slash(self):
         self.writer.set_source_dir('test/source/')
-        self.assertEqual(self.writer.source_dir, 'test/source')
+        self.assertEqual('test/source', self.writer.source_dir)
 
     def test_set_compiled_dir(self):
         self.writer.set_compiled_dir('test/compiled')
-        self.assertEqual(self.writer.compiled_dir, 'test/compiled')
+        self.assertEqual('test/compiled', self.writer.compiled_dir)
 
     def test_set_compiled_dir_with_trailing_slash(self):
         self.writer.set_compiled_dir('test/compiled/')
-        self.assertEqual(self.writer.compiled_dir, 'test/compiled')
+        self.assertEqual('test/compiled', self.writer.compiled_dir)
 
     def test_export(self):
         self.writer.header()
@@ -108,7 +108,7 @@ class WriterTests(unittest.TestCase):
         output_file = open('{}/{}.ly'.format(self.writer.source_dir, self.writer.filename))
         expected_file = open('expected/test_1.ly')
 
-        self.assertEqual(output_file.readlines(), expected_file.readlines())
+        self.assertEqual(expected_file.readlines(), output_file.readlines())
 
         output_file.close()
         expected_file.close()
@@ -152,7 +152,7 @@ class WriterTests(unittest.TestCase):
     # endregion
 
     def test_parse(self):
-        # TODO
+        # TODO: Test metody parsującej
         pass
 
 
