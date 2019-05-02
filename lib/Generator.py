@@ -4,9 +4,9 @@ from .OctaveType import OctaveType
 from .Note import Note
 from .Rest import Rest
 from .Writeable import Writeable
+from .NoteModifier import NoteModifier
 
 import copy
-import lib
 
 class Generator:
     def __init__(self):
@@ -239,7 +239,7 @@ class Generator:
                 note_2 = copy.deepcopy(note)
                 note.base_duration = value_to_fill
                 if isinstance(note, Note):
-                    note.add_modifier(lib.NoteModifier.TIE)
+                    note.add_modifier(NoteModifier.TIE)
                     notes_split[bar_nr].append(note)
                     note_2.base_duration -= value_to_fill
                 elif isinstance(note, Rest):

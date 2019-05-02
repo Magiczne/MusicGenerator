@@ -43,6 +43,14 @@ class NoteTests(unittest.TestCase):
 
     # endregion
 
+    # region __repr__
+
+    def test_repr(self):
+        note = lib.Note('c')
+        self.assertEqual('Note <c4>', repr(note))
+
+    # endregion
+
     # region get_duration
 
     def test_get_duration(self):

@@ -11,15 +11,14 @@ class Rest(Writeable):
         self.modifiers: List[RestModifier] = []
 
     def __eq__(self, other):
-        return (
-            self.__class__ == other.__class__ and
-            self.base_duration == other.base_duration and
-            self.modifiers == other.modifiers
-        )
+        return str(self) == str(other)
 
     def __str__(self):
         mods = ''.join([mod.value for mod in self.modifiers])
         return f'r{self.base_duration}{mods}'
+
+    def __repr__(self):
+        return f'Rest <{self.__str__()}>'
 
     def get_duration(self, minimum_note_length: int = 16) -> float:
         """

@@ -22,6 +22,10 @@ class RestTests(unittest.TestCase):
         rest.add_modifier(lib.RestModifier.DOUBLE_DOT)
         self.assertEqual('r4..', str(rest))
 
+    def test_repr(self):
+        rest = lib.Rest()
+        self.assertEqual('Rest <r4>', repr(rest))
+
     def test_get_duration(self):
         rest = lib.Rest()
         lengths = [64, 32, 16, 8, 4, 2, 1]

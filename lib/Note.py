@@ -6,29 +6,26 @@ from .Writeable import Writeable
 
 
 class Note(Writeable):
+    base_notes = ['c', 'd', 'e', 'f', 'g', 'a', 'b']
     def __init__(self, note: str, octave: OctaveType = OctaveType.SMALL, base_duration: int = 4):
         super().__init__(base_duration)
-        self.available_notes: List[str] = ['c', 'd', 'e', 'f', 'g', 'a', 'h']
-        # TODO: przeniesc liste mozliwych nut
-        if note in self.available_notes:
-            self.note: str = note
-        else:
+
+        if note[0] not in self.base_notes:
             raise ValueError
+
+        self.note = note
         self.octave: OctaveType = octave
         self.modifiers: List[NoteModifier] = []
 
     def __eq__(self, other):
-        return(
-            self.__class__ == other.__class__ and
-            self.note == other.note and
-            self.octave == other.octave and
-            self.base_duration == other.base_duration and
-            self.modifiers == other.modifiers
-        )
+        return str(self) == str(other)
 
     def __str__(self):
         mods = ''.join([mod.value for mod in self.modifiers])
         return f'{self.note}{self.octave.value}{self.base_duration}{mods}'
+
+    def __repr__(self):
+        return f'Note <{self.__str__()}>'
 
     def get_duration(self, minimum_note_length: int = 16) -> float:
         """
