@@ -30,7 +30,7 @@ class Generator:
         self.intervals: List[str] = [
             '1cz', '2m', '2w', '3m', '3w', '4cz', '4zw', '5zmn', '5cz', '6m', '6w', '7m', '7w', '8cz'
         ]
-        self.probability: List[float] = [8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
+        self.probability: List[int] = [8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
 
         # Wygenerowane dane
         self.generated_data: List[Writeable] = []
@@ -116,7 +116,7 @@ class Generator:
 
         return self
 
-    def set_interval_probability(self, interval: str, probability: float):
+    def set_interval_probability(self, interval: str, probability: int):
         """
         Set probability for specified interval
 
@@ -132,7 +132,7 @@ class Generator:
 
         return self
 
-    def set_intervals_probability(self, probabilities: List[float]):
+    def set_intervals_probability(self, probabilities: List[int]):
         """
         Set probabilities for all intervals at once
 
