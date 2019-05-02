@@ -6,6 +6,8 @@ from lib.RestModifier import RestModifier
 
 class RestTests(unittest.TestCase):
 
+    # region __init__
+
     def test_init(self):
         rest = Rest(base_duration=8)
         self.assertEqual(8, rest.base_duration)
@@ -15,10 +17,18 @@ class RestTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Rest(base_duration=5)
 
+    # endregion
+
+    # region __eq__
+
     def test_eq(self):
         rest = Rest(base_duration=8)
         rest2 = Rest(base_duration=8)
         self.assertEqual(rest, rest2)
+
+    # endregion
+
+    # region __str__
 
     def test_str(self):
         rest = Rest(base_duration=8)
@@ -29,9 +39,17 @@ class RestTests(unittest.TestCase):
         rest.add_modifier(RestModifier.DOUBLE_DOT)
         self.assertEqual('r4..', str(rest))
 
+    # endregion
+
+    # region __repr__
+
     def test_repr(self):
         rest = Rest()
         self.assertEqual('Rest <r4>', repr(rest))
+
+    # endregion
+
+    # region get_duration
 
     def test_get_duration(self):
         rest = Rest()
@@ -56,6 +74,10 @@ class RestTests(unittest.TestCase):
         for length in lengths:
             self.assertEqual(length / 4 + length / 8 + length / 16, rest.get_duration(length))
 
+    # endregion
+
+    # region add_modifier / remove_modifier
+
     def test_add_remove_modifier(self):
         rest = Rest()
         rest.add_modifier(RestModifier.DOT)
@@ -71,13 +93,23 @@ class RestTests(unittest.TestCase):
 
         self.assertEqual(1, len(rest.modifiers))
 
-    def test_add_modifier_double_dot_priority_over_dot(self):
+    def test_add_modifier_double_dot_removes_dot(self):
         rest = Rest()
         rest.add_modifier(RestModifier.DOT)
         rest.add_modifier(RestModifier.DOUBLE_DOT)
 
         self.assertTrue(RestModifier.DOUBLE_DOT in rest.modifiers)
         self.assertTrue(RestModifier.DOT not in rest.modifiers)
+
+    def test_add_modifier_dot_removes_double_dot(self):
+        rest = Rest()
+        rest.add_modifier(RestModifier.DOUBLE_DOT)
+        rest.add_modifier(RestModifier.DOT)
+
+        self.assertTrue(RestModifier.DOT in rest.modifiers)
+        self.assertTrue(RestModifier.DOUBLE_DOT not in rest.modifiers)
+
+    # endregion
 
 
 if __name__ == '__main__':

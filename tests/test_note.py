@@ -74,6 +74,12 @@ class NoteTests(unittest.TestCase):
             new_note: Note = note + Interval(intervals[i])
             self.assertEqual(expected[i], new_note.note)
 
+    def test_add_unsupported(self):
+        note = Note('c')
+
+        with self.assertRaises(NotImplementedError):
+            note + 5
+
     def test_sub_interval(self):
         note = Note('c')
 
@@ -90,6 +96,12 @@ class NoteTests(unittest.TestCase):
         for i in range(len(expected)):
             new_note: Note = note - Interval(intervals[i])
             self.assertEqual(expected[i], new_note.note)
+
+    def test_sub_unsupported(self):
+        note = Note('c')
+
+        with self.assertRaises(NotImplementedError):
+            note - 5
 
     # endregion
 
@@ -168,13 +180,21 @@ class NoteTests(unittest.TestCase):
 
         self.assertEqual(1, len(note.modifiers))
 
-    def test_add_modifier_double_dot_priority_over_dot(self):
+    def test_add_modifier_double_dot_removes_dot(self):
         note = Note('c')
         note.add_modifier(NoteModifier.DOT)
         note.add_modifier(NoteModifier.DOUBLE_DOT)
 
         self.assertTrue(NoteModifier.DOUBLE_DOT in note.modifiers)
         self.assertTrue(NoteModifier.DOT not in note.modifiers)
+
+    def test_add_modifier_dot_removes_double_dot(self):
+        note = Note('c')
+        note.add_modifier(NoteModifier.DOUBLE_DOT)
+        note.add_modifier(NoteModifier.DOT)
+
+        self.assertTrue(NoteModifier.DOT in note.modifiers)
+        self.assertTrue(NoteModifier.DOUBLE_DOT not in note.modifiers)
 
     def test_modifiers_order(self):
         note = Note('c')

@@ -245,7 +245,7 @@ class Generator:
                 elif isinstance(note, Rest):
                     notes_split[bar_nr].append(note)
                     note_2.base_duration -= value_to_fill
-                else:
+                else:   # pragma: no cover
                     raise TypeError
                 bar_nr += 1
                 notes_split[bar_nr].append(note_2)

@@ -135,9 +135,9 @@ class GeneratorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.generator.set_intervals_probability(probabilities)
 
-    def test_set_intervals_probability_more_than_one(self):
+    def test_set_intervals_probability_more_than_one_hundred(self):
         intervals = self.generator.intervals
-        probabilities = [0.5 for _ in intervals]
+        probabilities = [5 for _ in intervals]
 
         with self.assertRaises(ValueError):
             self.generator.set_intervals_probability(probabilities)
@@ -196,7 +196,7 @@ class GeneratorTests(unittest.TestCase):
 
         self.assertEqual(expected, bars)
 
-    def test_split_to_bars_with_break(self):
+    def test_split_to_bars_break(self):
         notes: List[Writeable] = [
             Note('c'), Note('c', base_duration=2), Note('c', base_duration=2),
             Note('c', base_duration=2), Rest()
@@ -211,6 +211,21 @@ class GeneratorTests(unittest.TestCase):
         ]
 
         bars: List[List[Writeable]] = self.generator.split_to_bars(notes)
+
+        self.assertEqual(expected, bars)
+
+    def test_split_to_bars_break_rest(self):
+        data: List[Writeable] = [
+            Note('c'), Note('c', base_duration=2), Rest(base_duration=2),
+            Note('c', base_duration=2), Rest()
+        ]
+
+        expected: List[List[Writeable]] = [
+            [Note('c'), Note('c', base_duration=2), Rest()],
+            [Rest(), Note('c', base_duration=2), Rest()]
+        ]
+
+        bars: List[List[Writeable]] = self.generator.split_to_bars(data)
 
         self.assertEqual(expected, bars)
 
@@ -247,7 +262,6 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(self.generator.start_note.note, first_note.note)
         self.assertEqual(self.generator.start_note.octave, first_note.octave)
 
-        last_note_idx = self.generator.get_last_note_idx()
         self.assertEqual(self.generator.end_note.note, last_note.note)
         self.assertEqual(self.generator.end_note.octave, last_note.note)
 
