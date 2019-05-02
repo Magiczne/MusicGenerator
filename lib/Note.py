@@ -23,7 +23,7 @@ class Note(Writeable):
         self.modifiers: List[NoteModifier] = []
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        return self.__class__ == other.__class__ and str(self) == str(other)
 
     def __str__(self):
         mods = ''.join([mod.value for mod in self.modifiers])

@@ -23,4 +23,4 @@ class Writeable(abc.ABC):
         Returns:
             Note duration in the minimum_note_length count
         """
-        pass
+        pass    # pragma: no cover

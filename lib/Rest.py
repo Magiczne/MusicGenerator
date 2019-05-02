@@ -11,7 +11,7 @@ class Rest(Writeable):
         self.modifiers: List[RestModifier] = []
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        return self.__class__ == other.__class__ and str(self) == str(other)
 
     def __str__(self):
         mods = ''.join([mod.value for mod in self.modifiers])
@@ -44,19 +44,17 @@ class Rest(Writeable):
         Args:
             modifier:   Modifier to be added
         """
+        if modifier not in self.modifiers:
+            self.modifiers.append(modifier)
+
         if modifier == RestModifier.DOUBLE_DOT:
             if RestModifier.DOT in self.modifiers:
                 self.modifiers.remove(RestModifier.DOT)
-            elif RestModifier.DOUBLE_DOT in self.modifiers:
-                self.modifiers.remove(RestModifier.DOUBLE_DOT)
 
         if modifier == RestModifier.DOT:
             if RestModifier.DOUBLE_DOT in self.modifiers:
                 self.modifiers.remove(RestModifier.DOUBLE_DOT)
-            elif RestModifier.DOT in self.modifiers:
-                self.modifiers.remove(RestModifier.DOT)
 
-        self.modifiers.append(modifier)
         return self
 
     def remove_modifier(self, modifier: RestModifier):
