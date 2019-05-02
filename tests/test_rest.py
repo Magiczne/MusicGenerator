@@ -13,6 +13,11 @@ class RestTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             lib.Rest(base_duration=5)
 
+    def test_eq(self):
+        rest = lib.Rest(base_duration=8)
+        rest2 = lib.Rest(base_duration=8)
+        self.assertEqual(rest, rest2)
+
     def test_str(self):
         rest = lib.Rest(base_duration=8)
         self.assertEqual('r8', str(rest))

@@ -51,6 +51,75 @@ class NoteTests(unittest.TestCase):
 
     # endregion
 
+    # region __add__ / __sub__
+
+    def test_add_interval(self):
+        note = lib.Note('c')
+
+        intervals = lib.Interval.names()
+        expected = ['c', 'des', 'd', 'ees', 'e', 'f', 'fis', 'ges', 'g', 'aes', 'a', 'bes', 'b', 'c']
+
+        for i in range(len(expected)):
+            new_note: lib.Note = note + lib.Interval(intervals[i])
+            self.assertEqual(expected[i], new_note.note)
+
+        note = lib.Note('f')
+        expected = ['f', 'ges', 'g', 'aes', 'a', 'bes', 'b', 'ces', 'c', 'des', 'd', 'ees', 'e', 'f']
+
+        for i in range(len(expected)):
+            new_note: lib.Note = note + lib.Interval(intervals[i])
+            self.assertEqual(expected[i], new_note.note)
+
+    def test_sub_interval(self):
+        note = lib.Note('c')
+
+        intervals = lib.Interval.names()
+        expected = ['c', 'b', 'bes', 'a', 'aes', 'g', 'ges', 'fis', 'f', 'e', 'ees', 'd', 'des', 'c']
+
+        for i in range(len(expected)):
+            new_note: lib.Note = note - lib.Interval(intervals[i])
+            self.assertEqual(expected[i], new_note.note)
+
+        note = lib.Note('f')
+        expected = ['f', 'e', 'ees', 'd', 'des', 'c', 'ces', 'b', 'bes', 'a', 'aes', 'g', 'ges', 'f']
+
+        for i in range(len(expected)):
+            new_note: lib.Note = note - lib.Interval(intervals[i])
+            self.assertEqual(expected[i], new_note.note)
+
+    # endregion
+
+    # region get_base_note / get_accidentals / get_accidentals_value
+
+    def test_get_base_note(self):
+        note = lib.Note('cis')
+        self.assertEqual('c', note.get_base_note())
+
+    def test_get_accidentals(self):
+        note = lib.Note('cis')
+        self.assertEqual('is', note.get_accidentals())
+
+    def test_get_accidentals_value(self):
+        note = lib.Note('cis')
+        self.assertEqual(1, note.get_accidentals_value())
+
+        note = lib.Note('ces')
+        self.assertEqual(-1, note.get_accidentals_value())
+
+    # endregion
+
+    # region create_accidentals_string
+
+    def test_create_accidentals_string(self):
+        values = range(-3, 3)
+        expected = ['eseses', 'eses', 'es', '', 'is', 'isis', 'isisis']
+
+        for i in values:
+            actual = lib.Note.create_accidentals_string(i)
+            self.assertEqual(expected[i + 3], actual)
+
+    # endregion
+
     # region get_duration
 
     def test_get_duration(self):
