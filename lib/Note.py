@@ -1,5 +1,7 @@
 from typing import List
+import copy
 
+from .Interval import Interval
 from .NoteModifier import NoteModifier
 from .OctaveType import OctaveType
 from .Writeable import Writeable
@@ -7,6 +9,9 @@ from .Writeable import Writeable
 
 class Note(Writeable):
     base_notes = ['c', 'd', 'e', 'f', 'g', 'a', 'b']
+    base_notes_indexes = {x: i for i, x in enumerate(base_notes)}
+    base_notes_ids = {'c': 0, 'd': 2, 'e': 4, 'f': 5, 'g': 7, 'a': 9, 'b': 11}
+
     def __init__(self, note: str, octave: OctaveType = OctaveType.SMALL, base_duration: int = 4):
         super().__init__(base_duration)
 
@@ -26,6 +31,74 @@ class Note(Writeable):
 
     def __repr__(self):
         return f'Note <{self.__str__()}>'
+
+    # region Base note & Accidentals
+
+    def get_base_note(self) -> str:
+        return self.note[0]
+
+    def get_base_note_id(self):
+        return self.base_notes_ids[self.get_base_note()]
+
+    def get_id(self):
+        # This is actually a number that is compliant to MIDI number and is used in some calculations or the intervals
+        return self.get_base_note_id() + OctaveType.get_id(self.octave) * 12 + self.get_accidentals_value()
+
+    def get_accidentals(self) -> str:
+        return self.note[1:]
+
+    def get_accidentals_value(self) -> int:
+        accidentals = self.get_accidentals()
+        return accidentals.count('is') - accidentals.count('es')
+
+    # endregion
+
+    # region Utility
+
+    @staticmethod
+    def create_accidentals_string(value: int) -> str:
+        if value < 0:
+            return 'es' * (-value)
+        else:
+            return 'is' * value
+
+    # endregion
+
+    # region Operators
+
+    def __add__(self, other):
+        if isinstance(other, Interval):
+            # Find new base note according to the current note
+            new_base_note_idx = (self.base_notes_indexes[self.get_base_note()] + other.degrees - 1) % len(self.base_notes)
+            new_base_note = self.base_notes[new_base_note_idx]
+            new_base_note_id = self.base_notes_ids[new_base_note]
+
+            new_id = self.get_id() + other.semitones
+
+            new_octave_id = OctaveType.get_id(self.octave) + int(self.get_base_note() in self.base_notes[8 - other.degrees:])
+            new_octave = OctaveType.from_id(new_octave_id)
+
+            id_difference = new_id % 12 - new_base_note_id
+
+            if id_difference < -3:
+                id_difference += 12
+            if id_difference > 3:
+                id_difference -= 12
+
+            return Note(f'{new_base_note}{self.create_accidentals_string(id_difference)}', new_octave)
+        else:
+            raise NotImplementedError('This operation is not implemented')
+
+    def __sub__(self, other):
+        if isinstance(other, Interval):
+            octave_lower = copy.deepcopy(self)
+            octave_lower.octave = OctaveType.get_octave_down(self.octave)
+
+            return octave_lower + other.get_complement_interval()
+        else:
+            raise NotImplementedError('This operation is not implemented')
+
+    # endregion
 
     def get_duration(self, minimum_note_length: int = 16) -> float:
         """
