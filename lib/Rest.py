@@ -1,7 +1,7 @@
 from typing import List
 
-from .RestModifier import RestModifier
-from .Writeable import Writeable
+from lib.RestModifier import RestModifier
+from lib.Writeable import Writeable
 
 
 class Rest(Writeable):

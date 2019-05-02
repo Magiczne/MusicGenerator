@@ -1,9 +1,9 @@
 from typing import List, Optional
 import os
 
-from .BarType import BarType
-from .KeyType import KeyType
-from .Writeable import Writeable
+from lib.BarType import BarType
+from lib.KeyType import KeyType
+from lib.Writeable import Writeable
 
 
 class Writer:

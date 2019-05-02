@@ -1,11 +1,14 @@
-import lib
 import os
 import unittest
+
+from lib.BarType import BarType
+from lib.KeyType import KeyType
+from lib.Writer import Writer
 
 
 class WriterTests(unittest.TestCase):
     def setUp(self):
-        self.writer = lib.Writer('test')
+        self.writer = Writer('test')
 
     # region Data appending utils
 
@@ -50,7 +53,7 @@ class WriterTests(unittest.TestCase):
             self.assertEqual(expected, actual)
 
     def test_get_bar(self):
-        bar = lib.BarType.DOUBLE_WIDE
+        bar = BarType.DOUBLE_WIDE
         self.assertEqual('\\bar ".."', self.writer.get_bar(bar))
 
     # endregion
@@ -72,7 +75,7 @@ class WriterTests(unittest.TestCase):
         self.assertIn('\\time 3/4', self.writer.lines)
 
     def test_key_signature(self):
-        self.writer.key_signature('c', lib.KeyType.MAJOR)
+        self.writer.key_signature('c', KeyType.MAJOR)
         self.assertIn('\\key c \\major', self.writer.lines)
 
     # endregion
@@ -98,7 +101,7 @@ class WriterTests(unittest.TestCase):
     def test_export(self):
         self.writer.header()
         self.writer.block_start()
-        self.writer.key_signature('c', lib.KeyType.MAJOR, indent=1)
+        self.writer.key_signature('c', KeyType.MAJOR, indent=1)
         self.writer.line("c' d' e' f' | g' a' b' r", indent=1)
         self.writer.block_end()
 
@@ -120,7 +123,7 @@ class WriterTests(unittest.TestCase):
     def test_compile(self):
         self.writer.header()
         self.writer.block_start()
-        self.writer.key_signature('c', lib.KeyType.MAJOR, indent=1)
+        self.writer.key_signature('c', KeyType.MAJOR, indent=1)
         self.writer.line("c' d' e' f' | g' a' b' r", indent=1)
         self.writer.block_end()
 

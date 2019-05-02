@@ -1,15 +1,13 @@
 import abc
-from typing import List
+import lib
 
 
 class Writeable(abc.ABC):
     def __init__(self, base_duration: int = 4):
-        self.available_lengths: List[int] = [16, 8, 4, 2, 1]
-        # TODO: przeniesc liste mozliwych wartosci
-        if base_duration in self.available_lengths:
-            self.base_duration: int = base_duration
-        else:
+        if base_duration not in lib.Generator.Generator.available_note_lengths:
             raise ValueError
+
+        self.base_duration: int = base_duration
         super().__init__()
 
     @abc.abstractmethod

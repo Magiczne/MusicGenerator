@@ -1,22 +1,22 @@
 from typing import Dict, List, Optional, Tuple, Union
-
-from .OctaveType import OctaveType
-from .Note import Note
-from .Rest import Rest
-from .Writeable import Writeable
-from .NoteModifier import NoteModifier
-
 import copy
 
+from lib.OctaveType import OctaveType
+from lib.Note import Note
+from lib.Rest import Rest
+from lib.Writeable import Writeable
+from lib.NoteModifier import NoteModifier
+
+
 class Generator:
+    available_note_lengths: List[int] = [2 ** i for i in range(7)]
+    available_metre_rhythmic_values: List[int] = [8, 4, 2]
+
     def __init__(self):
         # Parametry rytmu
         self.metre: Tuple[int, int] = (4, 4)
         self.bar_count: int = 4
         self.shortest_note_duration: int = 4
-
-        self.available_metre_rhythmic_values: List[int] = [8, 4, 2]
-        self.available_lengths: List[int] = [16, 8, 4, 2, 1]
 
         # Parametry melodii
         self.start_note: Note = Note('c', OctaveType.SMALL)
@@ -73,7 +73,7 @@ class Generator:
         Args:
             duration:   Shortest note duration
         """
-        if duration in self.available_lengths:
+        if duration in self.available_note_lengths:
             self.shortest_note_duration = duration
         else:
             raise ValueError()
