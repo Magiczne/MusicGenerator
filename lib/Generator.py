@@ -235,6 +235,10 @@ class Generator:
             if note.get_duration(self.shortest_note_duration) <= value_to_fill:  # how much of a bar will the note take
                 notes_split[bar_nr].append(note)
                 value_to_fill -= note.get_duration(self.shortest_note_duration)
+            elif value_to_fill == 0:
+                bar_nr =+ 1
+                value_to_fill = (self.get_length_to_fill() / self.bar_count) - note.get_duration(self.shortest_note_duration)
+                notes_split[bar_nr].append(note)
             else:
                 note_2 = copy.deepcopy(note)
                 note.base_duration = value_to_fill

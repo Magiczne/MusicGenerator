@@ -184,6 +184,7 @@ class GeneratorTests(unittest.TestCase):
     # region split_to_bars
 
     def test_split_to_bars(self):
+        self.generator.set_bar_count(2)
         notes: List[Writeable] = [Note('c')] * 7
         notes.append(Rest())
 
@@ -197,6 +198,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(expected, bars)
 
     def test_split_to_bars_break(self):
+        self.generator.set_bar_count(2)
         notes: List[Writeable] = [
             Note('c'), Note('c', base_duration=2), Note('c', base_duration=2),
             Note('c', base_duration=2), Rest()
@@ -215,6 +217,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(expected, bars)
 
     def test_split_to_bars_break_rest(self):
+        self.generator.set_bar_count(2)
         data: List[Writeable] = [
             Note('c'), Note('c', base_duration=2), Rest(base_duration=2),
             Note('c', base_duration=2), Rest()
