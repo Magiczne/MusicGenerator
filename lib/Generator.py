@@ -230,32 +230,35 @@ class Generator:
         """
         notes_split: List[List[Writeable]] = [[] for _ in range(self.bar_count)]  # list of empty lists to fill
         value_to_fill = self.get_length_to_fill() / self.bar_count  # total value to fill in a bar
+        base_duration = self.shortest_note_duration
         bar_nr = 0  # number of currently filled bar
         for note in notes:
-            if note.get_duration(self.shortest_note_duration) <= value_to_fill:  # how much of a bar will the note take
+            note_duration = note.get_duration(base_duration)
+            if note_duration <= value_to_fill:  # how much of a bar will the note take
                 notes_split[bar_nr].append(note)
-                value_to_fill -= note.get_duration(self.shortest_note_duration)
+                value_to_fill -= note_duration
             elif value_to_fill == 0:
                 bar_nr =+ 1
-                value_to_fill = (self.get_length_to_fill() / self.bar_count) - note.get_duration(self.shortest_note_duration)
+                value_to_fill = (self.get_length_to_fill() / self.bar_count) - note_duration
                 notes_split[bar_nr].append(note)
             else:
                 note_2 = copy.deepcopy(note)
-                note.base_duration = value_to_fill
+                note.base_duration = int(value_to_fill * base_duration) 
+                
                 if isinstance(note, Note):
                     note.add_modifier(NoteModifier.TIE)
                     notes_split[bar_nr].append(note)
-                    note_2.base_duration -= value_to_fill
+                    note_2.base_duration = int((note_2.get_duration(base_duration) - note.get_duration(base_duration)) * base_duration)
                 elif isinstance(note, Rest):
                     notes_split[bar_nr].append(note)
-                    note_2.base_duration -= value_to_fill
+                    note_2.base_duration = int((note_2.get_duration(base_duration) - note.get_duration(base_duration)) * base_duration)
                 else:   # pragma: no cover
                     raise TypeError
+                
                 bar_nr += 1
                 notes_split[bar_nr].append(note_2)
-                value_to_fill = self.get_length_to_fill() / self.bar_count
+                value_to_fill = int(self.get_length_to_fill() / self.bar_count - note_2.get_duration(base_duration))
 
-        # TODO: Implementacja pogrupowania nut w takty, złamanie odpowiednich nut łukiem, etc...
         return notes_split
 
     def group_bars(self, bars: List[List[Writeable]]) -> List[List[Writeable]]:
