@@ -1,14 +1,18 @@
-from typing import List
+from typing import List, Optional
 
 from lib.RestModifier import RestModifier
 from lib.Writeable import Writeable
 
 
 class Rest(Writeable):
-    def __init__(self, base_duration: int = 4):
+    def __init__(self, base_duration: int = 4, modifiers: Optional[List[RestModifier]] = None):
         super().__init__(base_duration)
 
         self.modifiers: List[RestModifier] = []
+
+        if modifiers is not None:
+            for mod in modifiers:
+                self.add_modifier(mod)
 
     def __eq__(self, other):
         return self.__class__ == other.__class__ and str(self) == str(other)

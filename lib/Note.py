@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import copy
 
 from lib.Interval import Interval
@@ -12,7 +12,8 @@ class Note(Writeable):
     base_notes_indexes = {x: i for i, x in enumerate(base_notes)}
     base_notes_ids = {'c': 0, 'd': 2, 'e': 4, 'f': 5, 'g': 7, 'a': 9, 'b': 11}
 
-    def __init__(self, note: str, octave: OctaveType = OctaveType.SMALL, base_duration: int = 4):
+    def __init__(self, note: str, octave: OctaveType = OctaveType.SMALL, base_duration: int = 4,
+                 modifiers: Optional[List[NoteModifier]] = None):
         super().__init__(base_duration)
 
         if note[0] not in self.base_notes:
@@ -21,6 +22,10 @@ class Note(Writeable):
         self.note = note
         self.octave: OctaveType = octave
         self.modifiers: List[NoteModifier] = []
+
+        if modifiers is not None:
+            for mod in modifiers:
+                self.add_modifier(mod)
 
     def __eq__(self, other):
         return self.__class__ == other.__class__ and str(self) == str(other)
