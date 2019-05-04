@@ -33,7 +33,7 @@ class Writer:
 
     def command(self, data: str, indent: int = 0):
         """
-        Add command line to the output data (starting with \ character)
+        Add command line to the output data (starting with the '\' character)
 
         Args:
              data:      Command data
@@ -200,5 +200,7 @@ class Writer:
         Args:
             bars:   List of bars containing notes to parse into output data
         """
-        # TODO: Parsowanie listy nut i wrzucanie ich do listy self.data
-        pass
+        for i, bar in enumerate(bars):
+            notes = ' '.join([str(item) for item in bar])
+            notes += ' |' if i != len(bars) - 1 else f' {self.get_bar(BarType.DOUBLE_NARROW_WIDE)}'
+            self.line(notes, indent=1)

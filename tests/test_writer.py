@@ -1,8 +1,14 @@
 import os
 import unittest
+from typing import List
 
 from lib.BarType import BarType
 from lib.KeyType import KeyType
+from lib.Note import Note
+from lib.NoteModifier import NoteModifier
+from lib.Rest import Rest
+from lib.RestModifier import RestModifier
+from lib.Writeable import Writeable
 from lib.Writer import Writer
 
 
@@ -155,8 +161,36 @@ class WriterTests(unittest.TestCase):
     # endregion
 
     def test_parse(self):
-        # TODO: Test metody parsującej
-        pass
+        bars: List[List[Writeable]] = [
+            [Note('c'), Note('d'), Note('e'), Note('f')],
+            [Note('c', base_duration=2), Note('d', base_duration=4, modifiers=[NoteModifier.DOT]),
+             Note('e', base_duration=8)],
+
+            [Rest(), Rest(2), Rest(8, [RestModifier.DOT]), Rest(16)],
+            [Rest(), Note('c'), Rest(), Note('c')],
+
+            [Note('c', base_duration=2), Note('d', base_duration=2, modifiers=[NoteModifier.TIE])],
+            [Note('d', base_duration=2), Rest(), Note('c', base_duration=8), Rest(8)]
+        ]
+
+        self.writer.header()
+        self.writer.block_start()
+        self.writer.parse(bars)
+        self.writer.block_end()
+
+        self.writer.export()
+
+        output_file = open(f'{self.writer.source_dir}/{self.writer.filename}.ly')
+        expected_file = open('expected/test_parse.ly')
+
+        self.assertEqual(expected_file.readlines(), output_file.readlines())
+
+        output_file.close()
+        expected_file.close()
+
+        # Cleanup
+        os.remove('{}/{}.ly'.format(self.writer.source_dir, self.writer.filename))
+        os.removedirs(self.writer.source_dir)
 
 
 if __name__ == '__main__':
