@@ -5,9 +5,9 @@ class BarType(Enum):
     SIMPLE_NARROW = '|'
     SIMPLE_WIDE = '.'
     DOUBLE_NARROW = '||'
-    DOUBLE_WIDE_NARROW = '|.'
+    DOUBLE_NARROW_WIDE = '|.'
     DOUBLE_WIDE = '..'
-    DOUBLE_NARROW_WIDE = '.|'
+    DOUBLE_WIDE_NARROW = '.|'
     TRIPLE_NARROW_WIDE_NARROW = '|.|'
 
     REP_START = '.|:'
