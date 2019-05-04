@@ -238,23 +238,23 @@ class Generator:
                 notes_split[bar_nr].append(note)
                 value_to_fill -= note_duration
             elif value_to_fill == 0:
-                bar_nr =+ 1
+                bar_nr += 1
                 value_to_fill = (self.get_length_to_fill() / self.bar_count) - note_duration
                 notes_split[bar_nr].append(note)
             else:
-                note_2 = copy.deepcopy(note)
-                note.base_duration = int(value_to_fill * base_duration) 
-                
+                # value_to_fill -> tyle jeszcze nut o podstawowej długosci ma wejsc do taktu 
+                note_2 = copy.deepcopy(note) 
+                note.base_duration = int(base_duration / value_to_fill)
                 if isinstance(note, Note):
                     note.add_modifier(NoteModifier.TIE)
                     notes_split[bar_nr].append(note)
-                    note_2.base_duration = int((note_2.get_duration(base_duration) - note.get_duration(base_duration)) * base_duration)
+                    note_2.base_duration = int(base_duration/(note_2.get_duration(base_duration) - note.get_duration(base_duration)))
                 elif isinstance(note, Rest):
                     notes_split[bar_nr].append(note)
-                    note_2.base_duration = int((note_2.get_duration(base_duration) - note.get_duration(base_duration)) * base_duration)
+                    note_2.base_duration = int(base_duration/(note_2.get_duration(base_duration) - note.get_duration(base_duration)))
                 else:   # pragma: no cover
                     raise TypeError
-                
+            
                 bar_nr += 1
                 notes_split[bar_nr].append(note_2)
                 value_to_fill = int(self.get_length_to_fill() / self.bar_count - note_2.get_duration(base_duration))

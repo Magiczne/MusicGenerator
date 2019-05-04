@@ -185,6 +185,7 @@ class GeneratorTests(unittest.TestCase):
 
     def test_split_to_bars(self):
         self.generator.set_bar_count(2)
+        self.generator.set_shortest_note_duration(16)
         notes: List[Writeable] = [Note('c')] * 7
         notes.append(Rest())
 
@@ -199,6 +200,7 @@ class GeneratorTests(unittest.TestCase):
 
     def test_split_to_bars_break(self):
         self.generator.set_bar_count(2)
+        self.generator.set_shortest_note_duration(16)
         notes: List[Writeable] = [
             Note('c'), Note('c', base_duration=2), Note('c', base_duration=2),
             Note('c', base_duration=2), Rest()
@@ -218,6 +220,7 @@ class GeneratorTests(unittest.TestCase):
 
     def test_split_to_bars_break_rest(self):
         self.generator.set_bar_count(2)
+        self.generator.set_shortest_note_duration(16)
         data: List[Writeable] = [
             Note('c'), Note('c', base_duration=2), Rest(base_duration=2),
             Note('c', base_duration=2), Rest()
@@ -234,6 +237,7 @@ class GeneratorTests(unittest.TestCase):
 
     def test_split_to_bars_different_durations(self):
         self.generator.set_bar_count(2)
+        self.generator.set_shortest_note_duration(16)
         data: List[Writeable] = [
             Note('c', base_duration=2), Note('d'), Note('e', base_duration=8), Note('f', base_duration=4),
             Note('c', base_duration=8), Rest(base_duration=2), Note('c', base_duration=4)
@@ -252,6 +256,7 @@ class GeneratorTests(unittest.TestCase):
 
     def test_split_to_bars_with_dot(self):
         self.generator.set_bar_count(2)
+        self.generator.set_shortest_note_duration(16)
 
         with_dot = Note('e', base_duration=4)
         with_dot.add_modifier(NoteModifier.DOT)
