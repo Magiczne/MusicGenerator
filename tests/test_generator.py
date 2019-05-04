@@ -232,13 +232,54 @@ class GeneratorTests(unittest.TestCase):
 
         self.assertEqual(expected, bars)
 
+    def test_split_to_bars_different_durations(self):
+        self.generator.set_bar_count(2)
+        data: List[Writeable] = [
+            Note('c', base_duration=2), Note('d'), Note('e', base_duration=8), Note('f', base_duration=4),
+            Note('c', base_duration=8), Rest(base_duration=2), Note('c', base_duration=4)
+        ]
+
+        with_tie = Note('f', base_duration=8)
+        with_tie.add_modifier(NoteModifier.TIE)
+
+        expected: List[List[Writeable]] = [
+            [Note('c', base_duration=2), Note('d'), Note('e', base_duration=8), with_tie],
+            [Note('f', base_duration=8), Note('c', base_duration=8), Rest(base_duration=2), Note('c')]
+        ]
+
+        bars: List[List[Writeable]] = self.generator.split_to_bars(data)
+        self.assertEqual(expected, bars)
+
+    def test_split_to_bars_with_dot(self):
+        self.generator.set_bar_count(2)
+
+        with_dot = Note('e', base_duration=4)
+        with_dot.add_modifier(NoteModifier.DOT)
+
+        data: List[Writeable] = [
+            Note('c', base_duration=2), Note('d'), with_dot,
+            Note('f', base_duration=8), Note('c', base_duration=2), Rest()
+        ]
+
+        with_tie = Note('e', base_duration=4)
+        with_tie.add_modifier(NoteModifier.TIE)
+
+        expected: List[List[Writeable]] = [
+            [Note('c', base_duration=2), Note('d'), with_tie],
+            [Note('e', base_duration=8), Note('f', base_duration=8), Note('c', base_duration=2), Rest()]
+        ]
+
+        bars: List[List[Writeable]] = self.generator.split_to_bars(data)
+        self.assertEqual(expected, bars)
+
+
     # endregion
 
     # region group_bars
 
     def test_group_bars_4_4(self):
         bars: List[List[Writeable]] = [
-            Note('c'), Note('c', base_duration=2), Note('c')
+            [Note('c'), Note('c', base_duration=2), Note('c')]
         ]
 
         with_tie = Note('c')
@@ -258,8 +299,8 @@ class GeneratorTests(unittest.TestCase):
     def test_generate(self):
         data: List[Writeable] = self.generator.generate()
 
-        first_note: Note = data[0]
-        last_note: Note = data[self.generator.get_last_note_idx()]
+        first_note = data[0]
+        last_note = data[self.generator.get_last_note_idx()]
 
         # Check start and end note
         self.assertEqual(self.generator.start_note.note, first_note.note)
