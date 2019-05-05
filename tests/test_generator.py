@@ -7,6 +7,7 @@ from lib.NoteModifier import NoteModifier
 from lib.OctaveType import OctaveType
 from lib.Rest import Rest
 from lib.Writeable import Writeable
+import lib.errors as errors
 
 
 class GeneratorTests(unittest.TestCase):
@@ -163,9 +164,10 @@ class GeneratorTests(unittest.TestCase):
         idx = self.generator.get_last_note_idx()
         self.assertEqual(2, idx)
 
+    def test_last_note_idx_raises(self):
         self.generator.generated_data = [Rest(), Rest(), Rest(), Rest()]
-        idx = self.generator.get_last_note_idx()
-        self.assertEqual(-1, idx)
+        with self.assertRaises(errors.NoNotesError.NoNotesError):
+            self.generator.get_last_note_idx()
 
     def test_get_length_to_fill(self):
         self.generator.set_bar_count(1)

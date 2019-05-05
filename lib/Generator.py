@@ -201,10 +201,15 @@ class Generator:
         Returns:
             Index if found
             -1 if not found
+
+        Raises:
+            NoNotesError:   When there are no notes in the generated data
         """
-        # TODO: Znajdź ostatni obiekty typu Note w liście i zwróć jego indeks lub -1 jeśli nie znaleziono
-        # Lista danych to self.generated_data
-        pass
+        for i, item in enumerate(reversed(self.generated_data)):
+            if isinstance(item, Note):
+                return len(self.generated_data) - i - 1
+
+        raise NoNotesError
 
     def get_length_to_fill(self) -> int:
         """
