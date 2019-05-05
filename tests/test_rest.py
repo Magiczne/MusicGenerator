@@ -1,7 +1,7 @@
 import unittest
 
-from lib.Rest import Rest
-from lib.RestModifier import RestModifier
+from lib.theory.Rest import Rest
+from lib.theory.RestModifier import RestModifier
 
 
 class RestTests(unittest.TestCase):

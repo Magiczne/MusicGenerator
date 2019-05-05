@@ -1,11 +1,11 @@
 from typing import Dict, List, Optional, Tuple, Union
 import copy
 
-from lib.OctaveType import OctaveType
-from lib.Note import Note
-from lib.Rest import Rest
-from lib.Writeable import Writeable
-from lib.NoteModifier import NoteModifier
+from lib.theory.OctaveType import OctaveType
+from lib.theory.Note import Note
+from lib.theory.Rest import Rest
+from lib.theory.Writeable import Writeable
+from lib.theory.NoteModifier import NoteModifier
 from lib.errors.NoNotesError import NoNotesError
 
 

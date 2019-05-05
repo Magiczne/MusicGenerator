@@ -3,7 +3,7 @@ import os
 
 from lib.BarType import BarType
 from lib.KeyType import KeyType
-from lib.Writeable import Writeable
+from lib.theory.Writeable import Writeable
 
 
 class Writer:

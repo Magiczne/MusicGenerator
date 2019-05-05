@@ -1,6 +1,6 @@
 import unittest
 
-from lib.Interval import Interval
+from lib.theory.Interval import Interval
 
 
 class IntervalTests(unittest.TestCase):

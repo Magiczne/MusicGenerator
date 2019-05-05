@@ -1,9 +1,9 @@
 import unittest
 
-from lib.Interval import Interval
-from lib.Note import Note
-from lib.NoteModifier import NoteModifier
-from lib.OctaveType import OctaveType
+from lib.theory.Interval import Interval
+from lib.theory.Note import Note
+from lib.theory.NoteModifier import NoteModifier
+from lib.theory.OctaveType import OctaveType
 
 
 class NoteTests(unittest.TestCase):

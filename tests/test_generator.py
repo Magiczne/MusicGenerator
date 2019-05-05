@@ -2,11 +2,11 @@ from typing import List
 import unittest
 
 from lib.Generator import Generator
-from lib.Note import Note
-from lib.NoteModifier import NoteModifier
-from lib.OctaveType import OctaveType
-from lib.Rest import Rest
-from lib.Writeable import Writeable
+from lib.theory.Note import Note
+from lib.theory.NoteModifier import NoteModifier
+from lib.theory.OctaveType import OctaveType
+from lib.theory.Rest import Rest
+from lib.theory.Writeable import Writeable
 import lib.errors as errors
 
 
@@ -153,11 +153,6 @@ class GeneratorTests(unittest.TestCase):
         for i in range(10):
             writeable = self.generator.get_random_writeable(8)
             self.assertLessEqual(writeable.get_duration(self.generator.shortest_note_duration), 8)
-
-    def test_get_random_note(self):
-        note = self.generator.get_random_note('d', OctaveType.LINE_5)
-        self.assertEqual('d', note.note)
-        self.assertEqual(OctaveType.LINE_5, note.octave)
 
     def test_last_note_idx(self):
         self.generator.generated_data = [Rest(), Rest(), Note('c'), Rest()]

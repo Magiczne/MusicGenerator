@@ -4,11 +4,11 @@ from typing import List
 
 from lib.BarType import BarType
 from lib.KeyType import KeyType
-from lib.Note import Note
-from lib.NoteModifier import NoteModifier
-from lib.Rest import Rest
-from lib.RestModifier import RestModifier
-from lib.Writeable import Writeable
+from lib.theory.Note import Note
+from lib.theory.NoteModifier import NoteModifier
+from lib.theory.Rest import Rest
+from lib.theory.RestModifier import RestModifier
+from lib.theory.Writeable import Writeable
 from lib.Writer import Writer
 
 

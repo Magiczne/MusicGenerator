@@ -1,3 +1,5 @@
-from . import BarType, KeyType, NoteModifier, OctaveType, RestModifier
-from . import Interval, Note, Rest, Writeable
-from . import Generator, Writer
+from lib.BarType import BarType
+from lib.Generator import Generator
+from lib.KeyType import KeyType
+from lib.Writer import Writer
+

@@ -4,7 +4,7 @@ import lib
 
 class Writeable(abc.ABC):
     def __init__(self, base_duration: int = 4):
-        if base_duration not in lib.Generator.Generator.available_note_lengths:
+        if base_duration not in lib.Generator.available_note_lengths:
             raise ValueError
 
         self.base_duration: int = base_duration

@@ -3,10 +3,10 @@ from typing import List, Optional
 import copy
 import random
 
-from lib.Interval import Interval
-from lib.NoteModifier import NoteModifier
-from lib.OctaveType import OctaveType
-from lib.Writeable import Writeable
+from lib.theory.Interval import Interval
+from lib.theory.NoteModifier import NoteModifier
+from lib.theory.OctaveType import OctaveType
+from lib.theory.Writeable import Writeable
 
 
 class Note(Writeable):

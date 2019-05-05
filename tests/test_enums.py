@@ -1,6 +1,6 @@
 import unittest
 
-from lib.OctaveType import OctaveType
+from lib.theory.OctaveType import OctaveType
 
 
 class TestOctaveType(unittest.TestCase):
