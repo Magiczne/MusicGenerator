@@ -1,5 +1,6 @@
 from __future__ import annotations
 from enum import Enum
+import random
 
 
 class OctaveType(Enum):
@@ -56,3 +57,8 @@ class OctaveType(Enum):
     @staticmethod
     def get_octave_down(octave_type: OctaveType) -> OctaveType:
         return OctaveType.from_id(OctaveType.get_id(octave_type) - 1)
+
+    @staticmethod
+    def random() -> OctaveType:
+        idx = random.randint(0, 10)
+        return OctaveType.from_id(idx)

@@ -6,10 +6,11 @@ from lib.Note import Note
 from lib.Rest import Rest
 from lib.Writeable import Writeable
 from lib.NoteModifier import NoteModifier
+from lib.errors.NoNotesError import NoNotesError
 
 
 class Generator:
-    available_note_lengths: List[int] = [2 ** i for i in range(7)]
+    available_note_lengths: List[int] = [2 ** i for i in range(5)]
     available_metre_rhythmic_values: List[int] = [8, 4, 2]
 
     def __init__(self):
@@ -179,21 +180,6 @@ class Generator:
         # 1. Jak zapobiec dużej ilości pauz następujących po sobie
         pass
 
-    def get_random_note(self, note: Optional[str] = None, octave: Optional[OctaveType] = None) -> Note:
-        """
-        Generate random note, optionally overriding some parameters
-
-        Args:
-            note:       Note pitch to be overridden in final return object
-            octave:     Note octave to be overridden in final return object
-
-        Returns:
-            Note object
-        """
-        # TODO: Wygeneruj losową nutę i zastąp odpowiednie wartości jeśli podano je w parametrach
-        # Tak na prawdę sprowadza się to do wygenerowania losowej nuty z mieszczącej się w ambitusie
-        pass
-
     def get_last_note_idx(self) -> int:
         """
         Get the index of a last note in the set of writeable objects
@@ -297,7 +283,9 @@ class Generator:
         length_to_fill = self.get_length_to_fill()
 
         # User have specified start note, so we start from it only randomizing duration
-        start_note = self.get_random_note(self.start_note.note, self.start_note.octave)
+        start_note = Note.random(self.shortest_note_duration)
+        start_note.note = self.start_note.note
+        start_note.octave = self.start_note.octave
         self.generated_data.append(start_note)
         length_to_fill -= start_note.get_duration(self.shortest_note_duration)
 
@@ -309,10 +297,13 @@ class Generator:
             self.generated_data.append(writeable)
 
         # Find the last generated note and replace note and octave values
-        last_note_idx = self.get_last_note_idx()
-        if last_note_idx != -1:
+        try:
+            last_note_idx = self.get_last_note_idx()
             self.generated_data[last_note_idx].note = self.end_note.note
             self.generated_data[last_note_idx].octave = self.end_note.octave
+        except NoNotesError:
+            pass
+            # TODO: Zrobić coś z tym błędem
 
         if group:
             bars = self.split_to_bars(self.generated_data)

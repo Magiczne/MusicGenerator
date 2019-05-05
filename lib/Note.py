@@ -1,5 +1,7 @@
+from __future__ import annotations
 from typing import List, Optional
 import copy
+import random
 
 from lib.Interval import Interval
 from lib.NoteModifier import NoteModifier
@@ -66,6 +68,51 @@ class Note(Writeable):
             return 'es' * (-value)
         else:
             return 'is' * value
+
+    @staticmethod
+    def random(shortest_duration: Optional[int] = None) -> Note:
+        """
+        Wygeneruj nutę z losowymi parametrami
+
+        Returns:
+            Nuta z losowymi parametrami
+        """
+        # TODO: Available notes się pojawia w kilku miejsach kodu, to trzeba poprawic.
+        available_notes = [2 ** i for i in range(5)]
+        available_mods = []
+
+        if shortest_duration is not None:
+            available_notes = [i for i in available_notes if i <= shortest_duration]
+        else:
+            shortest_duration = available_notes[-1]
+
+        # TODO: Sprawdzanie błędów?, Np wtedy gdy max_duration nie jest żadna base_duration
+        base_note = random.choice(Note.base_notes)
+        octave = OctaveType.random()
+        base_duration = random.choice(available_notes)
+        has_mod = random.choice([True, False])
+
+        note = Note(note=base_note, octave=octave, base_duration=base_duration)
+
+        # Jeśli długość nuty jest najkrótsza jaką możemy uzyskać, to nie możemy dodać modyfikatora wydłużającego,
+        # gdyż kropka lub podwójna kropka doda mniejszą wartość rytmiczną
+        if base_duration == shortest_duration:
+            has_mod = False
+
+        # Jeśli stosunek maksymalnej długości do wylosowanej jest większy lub równy 2 to przedłużenie kropką będzie
+        # miało długośc mniejszej lub równej shortest_duration, więć dostępny staje się modyfikator kropki
+        if shortest_duration / base_duration >= 2:
+            available_mods.append(NoteModifier.DOT)
+
+        # Jeśli stosunek maksymalnej długości do wylosowanej jest większy lub równy 4 to przedłużenie podwójna kropką
+        # w najgorszym wypadku sprawi, że będzie konieczność pojawienia się nuty o długości shortest_duration
+        if shortest_duration / base_duration >= 4:
+            available_mods.append(NoteModifier.DOUBLE_DOT)
+
+        if has_mod:
+            note.add_modifier(random.choice(available_mods))
+
+        return note
 
     # endregion
 
