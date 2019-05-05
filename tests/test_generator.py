@@ -17,7 +17,7 @@ class GeneratorTests(unittest.TestCase):
     def test_init(self):
         self.assertEqual((4, 4), self.generator.metre)
         self.assertEqual(4, self.generator.bar_count)
-        self.assertEqual(4, self.generator.shortest_note_duration)
+        self.assertEqual(16, self.generator.shortest_note_duration)
 
         self.assertEqual(Note('c', OctaveType.SMALL), self.generator.start_note)
         self.assertEqual(Note('c', OctaveType.LINE_1), self.generator.end_note)
@@ -58,7 +58,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(8, self.generator.shortest_note_duration)
 
     def test_set_invalid_note_duration(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(errors.InvalidNoteDuration):
             self.generator.set_shortest_note_duration(3)
 
     # endregion
@@ -161,7 +161,7 @@ class GeneratorTests(unittest.TestCase):
 
     def test_last_note_idx_raises(self):
         self.generator.generated_data = [Rest(), Rest(), Rest(), Rest()]
-        with self.assertRaises(errors.NoNotesError.NoNotesError):
+        with self.assertRaises(errors.NoNotesError):
             self.generator.get_last_note_idx()
 
     def test_get_length_to_fill(self):

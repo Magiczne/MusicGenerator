@@ -6,18 +6,19 @@ from lib.theory.Note import Note
 from lib.theory.Rest import Rest
 from lib.theory.Writeable import Writeable
 from lib.theory.NoteModifier import NoteModifier
-from lib.errors.NoNotesError import NoNotesError
+from lib.errors import InvalidNoteDuration, NoNotesError
 
 
 class Generator:
-    available_note_lengths: List[int] = [2 ** i for i in range(5)]
-    available_metre_rhythmic_values: List[int] = [8, 4, 2]
+    shortest_note_duration: int = 16
+
+    correct_note_lengths: List[int] = [2 ** i for i in range(7)]
+    correct_metre_rhythmic_values: List[int] = [8, 4, 2]
 
     def __init__(self):
         # Parametry rytmu
         self.metre: Tuple[int, int] = (4, 4)
         self.bar_count: int = 4
-        self.shortest_note_duration: int = 4
 
         # Parametry melodii
         self.start_note: Note = Note('c', OctaveType.SMALL)
@@ -36,6 +37,33 @@ class Generator:
         # Wygenerowane dane
         self.generated_data: List[Writeable] = []
 
+    # region Static
+
+    @staticmethod
+    def get_available_note_lengths(shortest_duration: Optional[int] = None):
+        if shortest_duration is None:
+            shortest_duration = Generator.shortest_note_duration
+
+        if shortest_duration not in Generator.correct_note_lengths:
+            raise InvalidNoteDuration(shortest_duration)
+
+        return [i for i in Generator.correct_note_lengths if i <= shortest_duration]
+
+    @staticmethod
+    def set_shortest_note_duration(duration: int):
+        """
+        Set shortest note duration
+
+        Args:
+            duration:   Shortest note duration
+        """
+        if duration in Generator.correct_note_lengths:
+            Generator.shortest_note_duration = duration
+        else:
+            raise InvalidNoteDuration(duration)
+
+    # endregion
+
     # region Setters
 
     def set_metre(self, n: int, m: int):
@@ -46,7 +74,7 @@ class Generator:
             n:  Number of notes
             m:  Note rhythmic value
         """
-        if m in self.available_metre_rhythmic_values:
+        if m in self.correct_metre_rhythmic_values:
             self.metre = (n, m)
         else:
             raise ValueError()
@@ -62,20 +90,6 @@ class Generator:
         """
         if bar_count >= 1:
             self.bar_count = bar_count
-        else:
-            raise ValueError()
-
-        return self
-
-    def set_shortest_note_duration(self, duration: int):
-        """
-        Set shortest note duration
-
-        Args:
-            duration:   Shortest note duration
-        """
-        if duration in self.available_note_lengths:
-            self.shortest_note_duration = duration
         else:
             raise ValueError()
 

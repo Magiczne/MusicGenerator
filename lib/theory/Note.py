@@ -3,10 +3,12 @@ from typing import List, Optional
 import copy
 import random
 
+import lib
 from lib.theory.Interval import Interval
 from lib.theory.NoteModifier import NoteModifier
 from lib.theory.OctaveType import OctaveType
 from lib.theory.Writeable import Writeable
+from lib.errors import InvalidNoteDuration
 
 
 class Note(Writeable):
@@ -74,19 +76,25 @@ class Note(Writeable):
         """
         Wygeneruj nutę z losowymi parametrami
 
+        Args:
+            shortest_duration:  Najkrótsza możliwa wartość rytmiczna która może wystąpić
+
         Returns:
             Nuta z losowymi parametrami
         """
-        # TODO: Available notes się pojawia w kilku miejsach kodu, to trzeba poprawic.
-        available_notes = [2 ** i for i in range(5)]
+
+        # Jeśli nie był podany parametr najkrótszej nuty, to zakładamy że najkrótszą możliwą wartością rytmiczną
+        # jest ta, która jest najmniejsza możliwa do wystąpienia w generatorze
+        if shortest_duration is None:
+            shortest_duration = lib.Generator.correct_note_lengths[-1]
+
+        if shortest_duration not in lib.Generator.correct_note_lengths:
+            raise InvalidNoteDuration(shortest_duration)
+
+        # Pobieramy listę dostępnych wartości rytmicznych i tworzymy listę dostępnych modyfikatorów
+        available_notes = lib.Generator.get_available_note_lengths(shortest_duration=shortest_duration)
         available_mods = []
 
-        if shortest_duration is not None:
-            available_notes = [i for i in available_notes if i <= shortest_duration]
-        else:
-            shortest_duration = available_notes[-1]
-
-        # TODO: Sprawdzanie błędów?, Np wtedy gdy max_duration nie jest żadna base_duration
         base_note = random.choice(Note.base_notes)
         octave = OctaveType.random()
         base_duration = random.choice(available_notes)
@@ -152,17 +160,20 @@ class Note(Writeable):
 
     # endregion
 
-    def get_duration(self, minimum_note_length: int = 16) -> float:
+    def get_duration(self, base_note_duration: int = 16) -> float:
         """
         Get note value in the minimum_note_length count
 
         Args:
-            minimum_note_length:    Minimum note length in which the duration will be calculated
+            base_note_duration:    Minimum note length in which the duration will be calculated
 
         Returns:
             Note duration in the minimum_note_length count
         """
-        note_duration = minimum_note_length / self.base_duration
+        if base_note_duration not in lib.Generator.correct_note_lengths:
+            raise InvalidNoteDuration(base_note_duration)
+
+        note_duration = base_note_duration / self.base_duration
         if NoteModifier.DOT in self.modifiers:
             note_duration = note_duration * 1.5
         elif NoteModifier.DOUBLE_DOT in self.modifiers:
