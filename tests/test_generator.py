@@ -6,6 +6,7 @@ from lib.theory.Note import Note
 from lib.theory.NoteModifier import NoteModifier
 from lib.theory.OctaveType import OctaveType
 from lib.theory.Rest import Rest
+from lib.theory.RestModifier import RestModifier
 from lib.theory.Writeable import Writeable
 import lib.errors as errors
 
@@ -24,6 +25,26 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(Note('c', OctaveType.SMALL), self.generator.ambitus['lowest'])
         self.assertEqual(Note('c', OctaveType.LINE_1), self.generator.ambitus['highest'])
         self.assertEqual(100, sum(self.generator.probability))
+
+    # region get_available_note_lengths
+
+    def test_get_available_note_lengths(self):
+        actual = Generator.get_available_note_lengths()
+        expected = [i for i in Generator.correct_note_lengths if i <= Generator.shortest_note_duration]
+
+        self.assertEqual(expected, actual)
+
+    def test_get_available_note_lengths_with_param(self):
+        actual = Generator.get_available_note_lengths(8)
+        expected = [1, 2, 4, 8]
+
+        self.assertEqual(expected, actual)
+
+    def test_get_available_note_lengths_raises_error(self):
+        with self.assertRaises(errors.InvalidNoteDuration):
+            Generator.get_available_note_lengths(5)
+
+    # endregion
 
     # region Setters
 
@@ -175,6 +196,76 @@ class GeneratorTests(unittest.TestCase):
 
         self.generator.set_shortest_note_duration(8)
         self.assertEqual(16, self.generator.get_length_to_fill())
+
+    # endregion
+
+    # region split_note
+
+    def test_split_note(self):
+        Generator.set_shortest_note_duration(16)
+        note = Note('c', base_duration=4)
+
+        actual = self.generator.split_note(note, 2)
+        expected = (
+            [Note('c', base_duration=8, modifiers=[NoteModifier.TIE])],
+            [Note('c', base_duration=8)]
+        )
+
+        self.assertEqual(expected, actual)
+
+    def test_split_note_expects_dot(self):
+        Generator.set_shortest_note_duration(16)
+        note = Note('c', base_duration=4)
+
+        actual = self.generator.split_note(note, 3)
+        expected = (
+            [Note('c', base_duration=8, modifiers=[NoteModifier.DOT, NoteModifier.TIE])],
+            [Note('c', base_duration=16)]
+        )
+
+        self.assertEqual(expected, actual)
+
+    def test_split_note_multiple_notes_on_left_side(self):
+        Generator.set_shortest_note_duration(16)
+        note = Note('c', base_duration=2)
+
+        actual = self.generator.split_note(note, 5)
+        expected = (
+            [
+                Note('c', base_duration=4, modifiers=[NoteModifier.TIE]),
+                Note('c', base_duration=16, modifiers=[NoteModifier.TIE])
+            ],
+            [Note('c', base_duration=8, modifiers=[NoteModifier.DOT, NoteModifier.TIE])]
+        )
+
+        self.assertEqual(expected, actual)
+
+    def test_split_note_multiple_notes_on_right_side(self):
+        Generator.set_shortest_note_duration(16)
+        note = Note('c', base_duration=2)
+
+        actual = self.generator.split_note(note, 3)
+        expected = (
+            [Note('c', base_duration=8, modifiers=[NoteModifier.DOT, NoteModifier.TIE])],
+            [
+                Note('c', base_duration=4, modifiers=[NoteModifier.TIE]),
+                Note('c', base_duration=16, modifiers=[NoteModifier.TIE])
+            ]
+        )
+
+        self.assertEqual(expected, actual)
+
+    def test_split_note_rests(self):
+        Generator.set_shortest_note_duration(16)
+        note = Rest(base_duration=2)
+
+        actual = self.generator.split_note(note, 3)
+        expected = (
+            [Rest(base_duration=8, modifiers=[RestModifier.DOT])],
+            [Rest(base_duration=4), Rest(base_duration=16)]
+        )
+
+        self.assertEqual(expected, actual)
 
     # endregion
 
