@@ -222,6 +222,41 @@ class Generator:
 
     # endregion
 
+    def split_note(self, elem: Writeable, first_duration: int) -> Tuple[List[Writeable], List[Writeable]]:
+        """
+        Podział obiektu (nuty lub pauzy) na granicy kreski taktowej. 
+
+        Args:
+            elem: Element do podziału
+            first_duration: Długość miejsca pozostałego w pierwszym takcie, wyrażona za pomocą ilości nut o 
+                            najmniejszej mdozwolonej wartości (shortest_note_duration)
+
+        Returns:
+            Krotka dwuelementowa. Pierwszym elementem jest lista obiektów, która ma się pojawić w pierwszym takcie. 
+            Drugim elementem jest lista obiektów, która ma się pojawić w drugim takcie.   
+        """
+        # base_duration = self.shortest_note_duration / first_duration
+        # second_duration = elem.get_duration(self.shortest_note_duration) - first_duration
+
+        # # 1. Podział pierwszej czesci (lewy takt)
+        # #   a.  Sprawdzenie czy jest długością bazową
+        # #       i.      Jeśli tak to dodajemy i kończymy pętlę
+        # #       ii.     Jesli nie to szukamy najwiekszej bazowej, ale mniejszej od tej i dodajemy do tablicy, odejmujemy jej dlugosc
+        # #               Zeby zostalo to co chcemy
+        # #       iii.    Patrzymy czy ta wartosc to nie polowa poprzedniej i dodajemy kropke, a jak nie to powtorzyc krok ii.
+        # #       iv.     Patrzymy czy wartosc to nie 1/4 poprzedniej (jesli ma kropke) i jak cos to dodajemy podwojna kropke
+        # #               Jesli nie, to powtarzamy krok ii.
+        # #       v.      Ogolnie to powtarzamy krok ii. do skutku az nasze duration wyniesie 0
+        # # 2. Podział drugiej czesci (drugi takt)
+
+        # # Sprawdzamy czy element ma długość należącą do możliwych długości(cała nuta, półnuta...)
+        # if base_duration.is_integer():
+        #     # TODO: do pierwszej tablicy dodać nutę o tej długości
+        # else:
+        #     # TODO: znaleźć wartość największą ale mniejszą od base_duration    
+        pass    
+
+
     def split_to_bars(self, notes: List[Writeable]) -> List[List[Writeable]]:
         """
         Split given list of notes into bars. Notes that overlap between bars will be split
@@ -247,22 +282,30 @@ class Generator:
                 value_to_fill = (self.get_length_to_fill() / self.bar_count) - note_duration
                 notes_split[bar_nr].append(note)
             else:
-                # value_to_fill -> tyle jeszcze nut o podstawowej długosci ma wejsc do taktu 
-                note_2 = copy.deepcopy(note) 
-                note.base_duration = int(base_duration / value_to_fill)
-                if isinstance(note, Note):
-                    note.add_modifier(NoteModifier.TIE)
-                    notes_split[bar_nr].append(note)
-                    note_2.base_duration = int(base_duration/(note_2.get_duration(base_duration) - note.get_duration(base_duration)))
-                elif isinstance(note, Rest):
-                    notes_split[bar_nr].append(note)
-                    note_2.base_duration = int(base_duration/(note_2.get_duration(base_duration) - note.get_duration(base_duration)))
-                else:   # pragma: no cover
-                    raise TypeError
-            
+                data: Tuple[List[Writeable], List[Writeable]] = self.split_note(note, value_to_fill)
+
+                notes_split[bar_nr].extend(data[0])
                 bar_nr += 1
-                notes_split[bar_nr].append(note_2)
-                value_to_fill = int(self.get_length_to_fill() / self.bar_count - note_2.get_duration(base_duration))
+                notes_split[bar_nr] = data[1]
+
+                # value_to_fill -> tyle jeszcze nut o podstawowej długosci ma wejsc do taktu 
+                
+                # Kopiujemy nute, żeby zachować jej oryginalne parametry, a następnie ustawiamy długość nuty, 
+                # która ma wypelnić poprzedni takt
+                # note_2 = copy.deepcopy(note) 
+                # note.base_duration = base_duration // value_to_fill
+
+                # if isinstance(note, Note):
+                #     note.add_modifier(NoteModifier.TIE)
+
+                # notes_split[bar_nr].append(note)
+
+                # duration_left = note_2.get_duration(base_duration) - note.get_duration(base_duration)
+                # note_2.base_duration = base_duration // duration_left
+
+                # bar_nr += 1
+                # notes_split[bar_nr].append(note_2)
+                # value_to_fill = int(self.get_length_to_fill() / self.bar_count - note_2.get_duration(base_duration))
 
         return notes_split
 
