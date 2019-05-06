@@ -416,16 +416,16 @@ class GeneratorTests(unittest.TestCase):
         else:
             raise TypeError
 
-        # Check length
+        # Sprawdzenie długości każdej nuty
         expected_length = self.generator.get_length_to_fill()
         actual_length = sum([item.get_duration(self.generator.shortest_note_duration) for item in data])
         self.assertEqual(expected_length, actual_length)
 
-        # Check ambitus
+        # Sprawdzenie czy nuty mieszczą się w ambitusie.
         notes = [item for item in data if isinstance(item, Note)]
-        for note in notes:
-            # TODO: Check if each of notes contains in ambitus (except first and last)
-            pass
+        for idx, note in enumerate(notes):
+            self.assertTrue(note <= self.generator.ambitus['highest'])
+            self.assertTrue(note >= self.generator.ambitus['lowest'])
 
     def test_generate_group(self):
         data: List[List[Writeable]] = self.generator.generate(group=True)
