@@ -235,26 +235,76 @@ class Generator:
             Krotka dwuelementowa. Pierwszym elementem jest lista obiektów, która ma się pojawić w pierwszym takcie. 
             Drugim elementem jest lista obiektów, która ma się pojawić w drugim takcie.   
         """
-        # base_duration = self.shortest_note_duration / first_duration
-        # second_duration = elem.get_duration(self.shortest_note_duration) - first_duration
+        base_duration = self.shortest_note_duration / first_duration
+        second_duration = elem.get_duration(self.shortest_note_duration) - first_duration
 
-        # # 1. Podział pierwszej czesci (lewy takt)
-        # #   a.  Sprawdzenie czy jest długością bazową
-        # #       i.      Jeśli tak to dodajemy i kończymy pętlę
-        # #       ii.     Jesli nie to szukamy najwiekszej bazowej, ale mniejszej od tej i dodajemy do tablicy, odejmujemy jej dlugosc
-        # #               Zeby zostalo to co chcemy
-        # #       iii.    Patrzymy czy ta wartosc to nie polowa poprzedniej i dodajemy kropke, a jak nie to powtorzyc krok ii.
-        # #       iv.     Patrzymy czy wartosc to nie 1/4 poprzedniej (jesli ma kropke) i jak cos to dodajemy podwojna kropke
-        # #               Jesli nie, to powtarzamy krok ii.
-        # #       v.      Ogolnie to powtarzamy krok ii. do skutku az nasze duration wyniesie 0
-        # # 2. Podział drugiej czesci (drugi takt)
+        # 1. Podział pierwszej czesci (lewy takt)
+        #   a.  Sprawdzenie czy jest długością bazową
+        #       i.      Jeśli tak to dodajemy i kończymy pętlę
+        #       ii.     Jesli nie to szukamy najwiekszej bazowej, ale mniejszej od tej i dodajemy do tablicy, odejmujemy jej dlugosc
+        #               Zeby zostalo to co chcemy
+        #       iii.    Patrzymy czy ta wartosc to nie polowa poprzedniej i dodajemy kropke, a jak nie to powtorzyc krok ii.
+        #       iv.     Patrzymy czy wartosc to nie 1/4 poprzedniej (jesli ma kropke) i jak cos to dodajemy podwojna kropke
+        #               Jesli nie, to powtarzamy krok ii.
+        #       v.      Ogolnie to powtarzamy krok ii. do skutku az nasze duration wyniesie 0
+        # 2. Podział drugiej czesci (drugi takt)
+        first_bar = []
+        second_bar = []
+        # kopiujemy parametry nuty aby móc później przypisać odpowiednią wartość do drugiego taktu
+        elem_2 = copy.deepcopy(elem)
+        # Sprawdzamy czy element ma długość należącą do możliwych długości(cała nuta, półnuta...)
+        while first_duration > 0:
+            if base_duration.is_integer():
+                elem.base_duration = int(base_duration)
+                first_bar.append(elem)
+                first_duration -= base_duration
+            else:
+                # najbliższa całkowita wartość czasu trwania nuty mieszcząca się w takcie
+                closest_whole = max(val for val in Generator.correct_note_lengths if val < base_duration)
+                elem.base_duration = int(closest_whole)
+                # sprawdzamy czy jakiś element został już wpisany do taktu i czy należy dodać do niego kropkę
+                # lub podwójną kropkę
+                if len(first_bar) != 0:
+                    print(first_bar)
+                    if elem.base_duration == first_bar[-1] * 0.5:
+                        first_bar[-1].add_modifier(NoteModifier.DOT)
+                    elif elem.base_duration == first_bar[-1] * 0.25:
+                        first_bar[-1].add_modifier(NoteModifier.DOUBLE_DOT)
+                else:
+                    first_bar.append(elem)
+                #zmieniamy wartość pozostałą do wypełnienia
+                first_duration -= int(closest_whole)
 
-        # # Sprawdzamy czy element ma długość należącą do możliwych długości(cała nuta, półnuta...)
-        # if base_duration.is_integer():
-        #     # TODO: do pierwszej tablicy dodać nutę o tej długości
-        # else:
-        #     # TODO: znaleźć wartość największą ale mniejszą od base_duration    
-        pass    
+        while second_duration > 0:
+            if base_duration.is_integer():
+                elem_2.base_duration = int(base_duration)
+                second_bar.append(elem_2)
+                second_duration -= base_duration
+            else:
+                # najbliższa całkowita wartość czasu trwania nuty mieszcząca się w takcie
+                closest_whole = max(val for val in Generator.correct_note_lengths if val < base_duration)
+                elem_2.base_duration = int(closest_whole)
+                # sprawdzamy czy jakiś element został już wpisany do taktu i czy należy dodać do niego kropkę
+                # lub podwójną kropkę
+                if len(second_bar) != 0:
+                    if elem_2.base_duration == second_bar[-1] * 0.5:
+                        second_bar[-1].add_modifier(NoteModifier.DOT)
+                    elif elem_2.base_duration == second_bar[-1] * 0.25:
+                        second_bar[-1].add_modifier(NoteModifier.DOUBLE_DOT)
+                else: 
+                    second_bar.append(elem_2)
+                #zmieniamy wartość pozostałą do wypełnienia
+                second_duration -= int(closest_whole)
+
+        # jeśli elementy są nutami łączymy je łukami
+        for elem in first_bar:
+            if isinstance(elem, Note):
+                elem.add_modifier(NoteModifier.TIE)
+
+        # usuwamy łuk z ostatniej nuty
+        if NoteModifier.TIE in second_bar[-1].modifiers:
+            second_bar[-1].remove_modifier(NoteModifier.TIE)                 
+        return  (first_bar, second_bar)  
 
 
     def split_to_bars(self, notes: List[Writeable]) -> List[List[Writeable]]:
@@ -286,6 +336,8 @@ class Generator:
 
                 notes_split[bar_nr].extend(data[0])
                 bar_nr += 1
+                print(bar_nr)
+                print(data[1])
                 notes_split[bar_nr] = data[1]
 
                 # value_to_fill -> tyle jeszcze nut o podstawowej długosci ma wejsc do taktu 
