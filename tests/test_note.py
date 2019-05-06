@@ -1,9 +1,11 @@
 import unittest
 
+import lib
 from lib.theory.Interval import Interval
 from lib.theory.Note import Note
 from lib.theory.NoteModifier import NoteModifier
 from lib.theory.OctaveType import OctaveType
+from lib.errors import InvalidNoteDuration
 
 
 class NoteTests(unittest.TestCase):
@@ -105,11 +107,19 @@ class NoteTests(unittest.TestCase):
 
     # endregion
 
-    # region get_base_note / get_accidentals / get_accidentals_value
+    # region get_base_note / get_base_note_id / get_id / get_accidentals / get_accidentals_value
 
     def test_get_base_note(self):
         note = Note('cis')
         self.assertEqual('c', note.get_base_note())
+
+    def test_get_base_note_id(self):
+        note = Note('cis')
+        self.assertEqual(0, note.get_base_note_id())
+
+    def test_get_id(self):
+        note = Note('cis')
+        self.assertEqual(49, note.get_id())
 
     def test_get_accidentals(self):
         note = Note('cis')
@@ -133,6 +143,32 @@ class NoteTests(unittest.TestCase):
         for i in values:
             actual = Note.create_accidentals_string(i)
             self.assertEqual(expected[i + 3], actual)
+
+    # endregion
+
+    # region random
+
+    def test_random_correct_duration(self):
+        durations = lib.Generator.correct_note_lengths
+        shortest_duration = durations[-1]
+
+        for i in range(50):
+            note = Note.random(shortest_duration)
+            self.assertGreaterEqual(note.get_duration(shortest_duration), 1)
+
+        for i in range(50):
+            note = Note.random()
+            self.assertGreaterEqual(note.get_duration(shortest_duration), 1)
+
+        shortest_duration = durations[0]
+
+        for i in range(50):
+            note = Note.random(shortest_duration)
+            self.assertEqual(note.get_duration(shortest_duration), 1)
+
+    def test_random_invalid_duration(self):
+        with self.assertRaises(InvalidNoteDuration):
+            Note.random(5)
 
     # endregion
 
@@ -160,6 +196,12 @@ class NoteTests(unittest.TestCase):
 
         for length in lengths:
             self.assertEqual(length / 4 + length / 8 + length / 16, note.get_duration(length))
+
+    def test_get_duration_raises_exception(self):
+        note = Note('c')
+
+        with self.assertRaises(InvalidNoteDuration):
+            note.get_duration(5)
 
     # endregion
 

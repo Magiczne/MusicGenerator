@@ -225,6 +225,18 @@ class GeneratorTests(unittest.TestCase):
 
         self.assertEqual(expected, actual)
 
+    def test_split_note_expects_double_dot(self):
+        Generator.set_shortest_note_duration(16)
+        note = Note('c', base_duration=2)
+
+        actual = self.generator.split_note(note, 7)
+        expected = (
+            [Note('c', base_duration=4, modifiers=[NoteModifier.DOUBLE_DOT, NoteModifier.TIE])],
+            [Note('c', base_duration=16)]
+        )
+
+        self.assertEqual(expected, actual)
+
     def test_split_note_multiple_notes_on_left_side(self):
         Generator.set_shortest_note_duration(16)
         note = Note('c', base_duration=2)
@@ -365,7 +377,6 @@ class GeneratorTests(unittest.TestCase):
         bars: List[List[Writeable]] = self.generator.split_to_bars(data)
         self.assertEqual(expected, bars)
 
-
     # endregion
 
     # region group_bars
@@ -395,12 +406,15 @@ class GeneratorTests(unittest.TestCase):
         first_note = data[0]
         last_note = data[self.generator.get_last_note_idx()]
 
-        # Check start and end note
-        self.assertEqual(self.generator.start_note.note, first_note.note)
-        self.assertEqual(self.generator.start_note.octave, first_note.octave)
+        if isinstance(first_note, Note) and isinstance(last_note, Note):
+            # Check start and end note
+            self.assertEqual(self.generator.start_note.note, first_note.note)
+            self.assertEqual(self.generator.start_note.octave, first_note.octave)
 
-        self.assertEqual(self.generator.end_note.note, last_note.note)
-        self.assertEqual(self.generator.end_note.octave, last_note.note)
+            self.assertEqual(self.generator.end_note.note, last_note.note)
+            self.assertEqual(self.generator.end_note.octave, last_note.note)
+        else:
+            raise TypeError
 
         # Check length
         expected_length = self.generator.get_length_to_fill()
