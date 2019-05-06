@@ -31,9 +31,6 @@ class Note(Writeable):
             for mod in modifiers:
                 self.add_modifier(mod)
 
-    def __eq__(self, other):
-        return self.__class__ == other.__class__ and str(self) == str(other)
-
     def __str__(self):
         mods = ''.join([mod.value for mod in self.modifiers])
         return f'{self.note}{self.octave.value}{self.base_duration}{mods}'
@@ -155,6 +152,33 @@ class Note(Writeable):
             octave_lower.octave = OctaveType.get_octave_down(self.octave)
 
             return octave_lower + other.get_complement_interval()
+        else:
+            raise NotImplementedError('This operation is not implemented')
+
+    def __eq__(self, other):
+        return self.__class__ == other.__class__ and str(self) == str(other)
+
+    def __lt__(self, other):
+        if isinstance(other, Note):
+            return self.get_id() < other.get_id()
+        else:
+            raise NotImplementedError('This operation is not implemented')
+
+    def __le__(self, other):
+        if isinstance(other, Note):
+            return self.get_id() <= other.get_id()
+        else:
+            raise NotImplementedError('This operation is not implemented')
+
+    def __gt__(self, other):
+        if isinstance(other, Note):
+            return self.get_id() > other.get_id()
+        else:
+            raise NotImplementedError('This operation is not implemented')
+
+    def __ge__(self, other):
+        if isinstance(other, Note):
+            return self.get_id() >= other.get_id()
         else:
             raise NotImplementedError('This operation is not implemented')
 

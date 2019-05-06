@@ -107,6 +107,72 @@ class NoteTests(unittest.TestCase):
 
     # endregion
 
+    # region __eq__
+
+    def test_eq(self):
+        note_1 = Note('c', base_duration=4)
+        note_2 = Note('c', base_duration=4)
+
+        self.assertEqual(note_1, note_2)
+
+    # endregion
+
+    # region __lt__ / __le__
+
+    def test_lt(self):
+        note_1 = Note('d')
+        note_2 = Note('c')
+        self.assertTrue(note_2 < note_1)
+
+        note_2 = Note('d')
+        self.assertFalse(note_2 < note_1)
+
+        note_1 = Note('d', OctaveType.CONTRA)
+        note_2 = Note('d', OctaveType.SMALL)
+        self.assertFalse(note_2 < note_1)
+
+    def test_le(self):
+        note_1 = Note('d')
+        note_2 = Note('c')
+        self.assertTrue(note_2 <= note_1)
+
+        note_2 = Note('d')
+        self.assertTrue(note_2 <= note_1)
+
+        note_1 = Note('d', OctaveType.CONTRA)
+        note_2 = Note('d', OctaveType.SMALL)
+        self.assertFalse(note_2 <= note_1)
+
+    # endregion
+
+    # region __gt__ / __ge__
+
+    def test_gt(self):
+        note_1 = Note('c')
+        note_2 = Note('d')
+        self.assertTrue(note_2 > note_1)
+
+        note_2 = Note('c')
+        self.assertFalse(note_2 > note_1)
+
+        note_1 = Note('d', OctaveType.CONTRA)
+        note_2 = Note('d', OctaveType.SMALL)
+        self.assertTrue(note_2 > note_1)
+
+    def test_ge(self):
+        note_1 = Note('c')
+        note_2 = Note('d')
+        self.assertTrue(note_2 >= note_1)
+
+        note_2 = Note('c')
+        self.assertTrue(note_2 >= note_1)
+
+        note_1 = Note('d', OctaveType.CONTRA)
+        note_2 = Note('d', OctaveType.SMALL)
+        self.assertTrue(note_2 >= note_1)
+
+    # endregion
+
     # region get_base_note / get_base_note_id / get_id / get_accidentals / get_accidentals_value
 
     def test_get_base_note(self):
