@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional, Tuple, Union
 import copy
+import termcolor
+import sys
 
 from lib.theory.OctaveType import OctaveType
 from lib.theory.Note import Note
@@ -411,8 +413,7 @@ class Generator:
             self.generated_data[last_note_idx].note = self.end_note.note
             self.generated_data[last_note_idx].octave = self.end_note.octave
         except NoNotesError:
-            pass
-            # TODO: Zrobić coś z tym błędem
+            print(termcolor.colored('The are no notes in the generated file! Something went wrong?', 'red'))
 
         if group:
             bars = self.split_to_bars(self.generated_data)
