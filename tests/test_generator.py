@@ -279,6 +279,17 @@ class GeneratorTests(unittest.TestCase):
 
         self.assertEqual(expected, actual)
 
+    def test_split_note_expects_double_dot_and_note(self):
+        Generator.set_shortest_note_duration(16)
+        note = Note('c', base_duration=1)
+
+        actual = self.generator.split_note(note, 15)
+        expected = (
+            [Note('c', base_duration=2, modifiers=[NoteModifier.DOUBLE_DOT]), Note('c', base_duration=16)],
+            [Note('c', base_duration=16)]
+        )
+        self.assertEqual(expected, actual)
+
     def test_split_note_rests(self):
         Generator.set_shortest_note_duration(16)
         note = Rest(base_duration=2)
