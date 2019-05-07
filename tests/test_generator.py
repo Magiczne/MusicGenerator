@@ -259,7 +259,7 @@ class GeneratorTests(unittest.TestCase):
                 Note('c', base_duration=4, modifiers=[NoteModifier.TIE]),
                 Note('c', base_duration=16, modifiers=[NoteModifier.TIE])
             ],
-            [Note('c', base_duration=8, modifiers=[NoteModifier.DOT, NoteModifier.TIE])]
+            [Note('c', base_duration=8, modifiers=[NoteModifier.DOT])]
         )
 
         self.assertEqual(expected, actual)
@@ -273,7 +273,7 @@ class GeneratorTests(unittest.TestCase):
             [Note('c', base_duration=8, modifiers=[NoteModifier.DOT, NoteModifier.TIE])],
             [
                 Note('c', base_duration=4, modifiers=[NoteModifier.TIE]),
-                Note('c', base_duration=16, modifiers=[NoteModifier.TIE])
+                Note('c', base_duration=16)
             ]
         )
 
