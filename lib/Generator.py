@@ -331,7 +331,7 @@ class Generator:
         Returns:
             List of bars of notes
         """
-        notes_split: List[List[Writeable]] = [[] for _ in range(self.bar_count)]  # list of empty lists to fill
+        notes_split: List[List[Writeable]] = [[] for _ in range(self.bar_count)] # list of empty lists to fill
         value_to_fill = self.get_length_to_fill() / self.bar_count  # total value to fill in a bar
         base_duration = self.shortest_note_duration
         bar_nr = 0  # number of currently filled bar
@@ -346,12 +346,20 @@ class Generator:
                 notes_split[bar_nr].append(note)
             else:
                 data: Tuple[List[Writeable], List[Writeable]] = self.split_note(note, value_to_fill)
-
-                notes_split[bar_nr].extend(data[0])
-                bar_nr += 1
                 print(bar_nr)
-                print(data[1])
+                notes_split[bar_nr].extend(data[0])
+                print(notes_split)
+                bar_nr += 1
+                value_filled = 0
+                for elem in data[1]:
+                    value_filled += elem.get_duration(self.shortest_note_duration)
+                value_to_fill = (self.get_length_to_fill() / self.bar_count) - value_filled    
+                print(bar_nr)
+                # for elem in data[1]:
+                #     notes_split[bar_nr].append(elem)
                 notes_split[bar_nr] = data[1]
+                print(notes_split) 
+                print(value_to_fill)  
 
         return notes_split
 
