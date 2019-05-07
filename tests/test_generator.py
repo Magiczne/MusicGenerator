@@ -130,6 +130,18 @@ class GeneratorTests(unittest.TestCase):
 
     # endregion
 
+    # region set_rest_probability
+
+    def test_set_rest_probability(self):
+        self.generator.set_rest_probability(0.7)
+        self.assertEqual(0.7, self.generator.rest_probability)
+
+    def test_set_rest_probability_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.generator.set_rest_probability(1.5)
+
+    # endregion
+
     # region set_interval_probability
 
     def test_set_interval_probability(self):

@@ -29,6 +29,7 @@ class Generator:
             'lowest': Note('c', OctaveType.SMALL),
             'highest': Note('c', OctaveType.LINE_1)
         }
+        self.rest_probability = 0.5
 
         # Parametry występowania interwałów
         self.intervals: List[str] = [
@@ -130,6 +131,23 @@ class Generator:
 
         if highest is not None:
             self.ambitus['highest'] = highest
+
+        return self
+
+    def set_rest_probability(self, probability: float):
+        """
+        Ustaw prawdopodobieństwo wystąpienia pauzy. Musi się zawierać w przedziale [0, 1]
+
+        Args:
+            probability:    Prawdopodobieństwo wystąpienia pauzy
+
+        Raises:
+            ValueError:     Gdy prawdopodobieństwo nie zawiera się w przedziale [0, 1]
+        """
+        if probability < 0 or probability > 1:
+            raise ValueError
+
+        self.rest_probability = probability
 
         return self
 
