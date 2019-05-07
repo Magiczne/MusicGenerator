@@ -287,7 +287,10 @@ class GeneratorTests(unittest.TestCase):
 
         actual = self.generator.split_note(note, 15)
         expected = (
-            [Note('c', base_duration=2, modifiers=[NoteModifier.DOUBLE_DOT]), Note('c', base_duration=16)],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOUBLE_DOT, NoteModifier.TIE]),
+                Note('c', base_duration=16, modifiers=[NoteModifier.TIE])
+            ],
             [Note('c', base_duration=16)]
         )
         self.assertEqual(expected, actual)
