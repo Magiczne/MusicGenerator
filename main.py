@@ -17,9 +17,14 @@ def main():
 
     generator.set_shortest_note_duration(16)
 
-    notes = generator.generate(group=True)
+    notes = generator.generate(group=False)
 
-    writer.parse(notes)
+    writer.header()
+
+    writer.block_start()
+    writer.parse([notes])
+    writer.block_end()
+
     writer.export()
     writer.compile()
 

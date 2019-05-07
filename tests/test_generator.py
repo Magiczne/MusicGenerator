@@ -18,31 +18,31 @@ class GeneratorTests(unittest.TestCase):
     def test_init(self):
         self.assertEqual((4, 4), self.generator.metre)
         self.assertEqual(4, self.generator.bar_count)
-        self.assertEqual(16, self.generator.shortest_note_duration)
 
-        self.assertEqual(Note('c', OctaveType.SMALL), self.generator.start_note)
+        self.assertEqual(Note('c', OctaveType.LINE_1), self.generator.start_note)
         self.assertEqual(Note('c', OctaveType.LINE_1), self.generator.end_note)
         self.assertEqual(Note('c', OctaveType.SMALL), self.generator.ambitus['lowest'])
-        self.assertEqual(Note('c', OctaveType.LINE_1), self.generator.ambitus['highest'])
+        self.assertEqual(Note('c', OctaveType.LINE_4), self.generator.ambitus['highest'])
+        self.assertEqual(0.5, self.generator.rest_probability)
         self.assertEqual(100, sum(self.generator.probability))
 
     # region get_available_note_lengths
 
     def test_get_available_note_lengths(self):
         actual = Generator.get_available_note_lengths()
-        expected = [i for i in Generator.correct_note_lengths if i <= Generator.shortest_note_duration]
+        expected = [
+            i for i in Generator.correct_note_lengths
+            if Generator.shortest_note_duration / i <= Generator.shortest_note_duration and i <= Generator.shortest_note_duration
+        ]
 
         self.assertEqual(expected, actual)
 
     def test_get_available_note_lengths_with_param(self):
-        actual = Generator.get_available_note_lengths(8)
-        expected = [1, 2, 4, 8]
+        Generator.set_shortest_note_duration(16)
+        actual = Generator.get_available_note_lengths(2)
+        expected = [8, 16]
 
         self.assertEqual(expected, actual)
-
-    def test_get_available_note_lengths_raises_error(self):
-        with self.assertRaises(errors.InvalidNoteDuration):
-            Generator.get_available_note_lengths(5)
 
     # endregion
 
@@ -107,13 +107,13 @@ class GeneratorTests(unittest.TestCase):
     def test_set_ambitus_no_params(self):
         self.generator.set_ambitus()
         self.assertEqual(Note('c', OctaveType.SMALL), self.generator.ambitus['lowest'])
-        self.assertEqual(Note('c', OctaveType.LINE_1), self.generator.ambitus['highest'])
+        self.assertEqual(Note('c', OctaveType.LINE_4), self.generator.ambitus['highest'])
 
     def test_set_ambitus_lowest(self):
         note = Note('c')
         self.generator.set_ambitus(lowest=note)
         self.assertEqual(note, self.generator.ambitus['lowest'])
-        self.assertEqual(Note('c', OctaveType.LINE_1), self.generator.ambitus['highest'])
+        self.assertEqual(Note('c', OctaveType.LINE_4), self.generator.ambitus['highest'])
 
     def test_set_ambitus_highest(self):
         note = Note('c')
@@ -182,9 +182,11 @@ class GeneratorTests(unittest.TestCase):
 
     # region Utility methods
 
-    def test_get_random_writeable(self):
+    def test_get_next_writeable(self):
+        self.generator.generated_data.append(Note('c'))
+
         for i in range(10):
-            writeable = self.generator.get_random_writeable(8)
+            writeable = self.generator.get_next_writeable(8)
             self.assertLessEqual(writeable.get_duration(self.generator.shortest_note_duration), 8)
 
     def test_last_note_idx(self):
@@ -424,31 +426,32 @@ class GeneratorTests(unittest.TestCase):
     # region generate
 
     def test_generate(self):
-        data: List[Writeable] = self.generator.generate()
+        for _ in range(50):
+            data: List[Writeable] = self.generator.generate()
 
-        first_note = data[0]
-        last_note = data[self.generator.get_last_note_idx()]
+            first_note = data[0]
+            last_note = data[self.generator.get_last_note_idx()]
 
-        if isinstance(first_note, Note) and isinstance(last_note, Note):
-            # Check start and end note
-            self.assertEqual(self.generator.start_note.note, first_note.note)
-            self.assertEqual(self.generator.start_note.octave, first_note.octave)
+            if isinstance(first_note, Note) and isinstance(last_note, Note):
+                # Check start and end note
+                self.assertEqual(self.generator.start_note.note, first_note.note)
+                self.assertEqual(self.generator.start_note.octave, first_note.octave)
 
-            self.assertEqual(self.generator.end_note.note, last_note.note)
-            self.assertEqual(self.generator.end_note.octave, last_note.note)
-        else:
-            raise TypeError
+                self.assertEqual(self.generator.end_note.note, last_note.note)
+                self.assertEqual(self.generator.end_note.octave, last_note.octave)
+            else:
+                raise TypeError
 
-        # Sprawdzenie długości każdej nuty
-        expected_length = self.generator.get_length_to_fill()
-        actual_length = sum([item.get_duration(self.generator.shortest_note_duration) for item in data])
-        self.assertEqual(expected_length, actual_length)
+            # Sprawdzenie długości każdej nuty
+            expected_length = self.generator.get_length_to_fill()
+            actual_length = sum([item.get_duration(self.generator.shortest_note_duration) for item in data])
+            self.assertEqual(expected_length, actual_length)
 
-        # Sprawdzenie czy nuty mieszczą się w ambitusie.
-        notes = [item for item in data if isinstance(item, Note)]
-        for idx, note in enumerate(notes):
-            self.assertTrue(note <= self.generator.ambitus['highest'])
-            self.assertTrue(note >= self.generator.ambitus['lowest'])
+            # Sprawdzenie czy nuty mieszczą się w ambitusie.
+            notes = [item for item in data if isinstance(item, Note)]
+            for idx, note in enumerate(notes):
+                self.assertTrue(note <= self.generator.ambitus['highest'])
+                self.assertTrue(note >= self.generator.ambitus['lowest'])
 
     def test_generate_group(self):
         data: List[List[Writeable]] = self.generator.generate(group=True)

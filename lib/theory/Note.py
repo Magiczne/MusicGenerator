@@ -241,3 +241,18 @@ class Note(Writeable):
         """
         self.modifiers.remove(modifier)
         return self
+
+    def between(self, lower: Note, higher: Note) -> bool:
+        """
+        Sprawdź czy nuta mieści się pomiędzy dwoma innymi
+
+        Args:
+            lower:  Nuta początkowa zakresu
+            higher: Nuta końcowa zakresu
+        """
+        # Jeśli nuta początkowa jest większa niż końcowa, to zmieniamy ich kolejność
+        if lower > higher:
+            lower, higher = higher, lower
+
+        return lower <= self <= higher
+

@@ -2,7 +2,10 @@ from typing import Dict, List, Optional, Tuple, Union
 import copy
 # import termcolor
 import sys
+import random
+import numpy as np
 
+from lib.theory.Interval import Interval
 from lib.theory.OctaveType import OctaveType
 from lib.theory.Note import Note
 from lib.theory.Rest import Rest
@@ -23,11 +26,11 @@ class Generator:
         self.bar_count: int = 4
 
         # Parametry melodii
-        self.start_note: Note = Note('c', OctaveType.SMALL)
+        self.start_note: Note = Note('c', OctaveType.LINE_1)
         self.end_note: Note = Note('c', OctaveType.LINE_1)
         self.ambitus: Dict[str, Note] = {
             'lowest': Note('c', OctaveType.SMALL),
-            'highest': Note('c', OctaveType.LINE_1)
+            'highest': Note('c', OctaveType.LINE_4)
         }
         self.rest_probability = 0.5
 
@@ -188,31 +191,65 @@ class Generator:
 
     # region Utility methods
 
-    def get_random_writeable(self, max_duration: int) -> Writeable:
+    def get_next_writeable(self, shortest_duration: int) -> Writeable:
         """
-        Generate random writeable object (Note or Rest)
+        Wygeneruj losowy element (nutę lub pauzę) ograniczony poprzez maksymalną wartość rytmiczną,
+        która może wystąpić.
+        UWAGA: Ta metoda będzie działać poprawnie tylko wtedy jeśli w kontenerze self.generated_data
+        znajduje się conajmniej jedna nuta!
 
         Args:
-            max_duration:   Maximal duration for the writeable object
+            shortest_duration:      Najkrótsza możliwa do wystąpienia wartość rytmiczna, podana w ilości
+                                    shortest_note_duration
 
-        Returns:
-             Writeable object
+        Raises:
+            IndexError:     Gdy brakuje nuty na podstawie której można wygenerować następny element
+            TypeError:      Gdy ostatnim elementem nie jest nuta
         """
-        # TODO: Wygeneruj losowo nutę lub pauzę o określonej maksymalnej długości
-        # TODO: Kurdebele to jest najcięższa funkcja XD
-        # Trzeba pamiętać aby wykorzystać self.get_last_note_idx do tworzenia nuty po wylosowaniu interwału
-        # (Od czegoś trzeba ten interwał stworzyć)
-
-        # Tak na prawdę najpierw trzeba wybrać czy stworzymy nutę czy pauzę
-        # Jeśli pauzę to nie ma problemu, tylko generujemy długośc (ewentualne kropki)
-        # Jeśli nutę to losujemy interwał i na podstawie tego interwału generujemy następną nutę razem z długością,
-        # gdyż wysokość i oktawa będzię określona przez wybrany interwał.
-        # Należy też sprawdzać czy wylosowany interwał mieści się w ambitusie ustalonym przez użytkownika
-        # Dodatkowo należy pamiętać że interwały mogą być w dwie strony (w dół i w górę) i też należy to wylosować
-
-        # PRZEMYSLEC
+        # TODO: PRZEMYSLEC
         # 1. Jak zapobiec dużej ilości pauz następujących po sobie
-        pass
+
+        generate_rest = np.random.choice([True, False], p=[self.rest_probability, 1 - self.rest_probability])
+
+        if generate_rest:
+            return Rest.random(shortest_duration)
+        else:
+            last_note_idx = self.get_last_note_idx()
+
+            if last_note_idx == -1:
+                raise IndexError
+
+            last_note = self.generated_data[last_note_idx]
+
+            if not isinstance(last_note, Note):
+                raise TypeError
+
+            # Losujemy do momentu, aż któraś z nut nie będzie się mieścić w naszym przedziale
+            while True:
+                # Wybieramy losowy interwał i tworzymy dwie nuty, jedną w górę drugą w dół o wylosowany interwał
+                interval = np.random.choice(self.intervals, p=self.get_normalized_intervals_probability())
+                next_note_up = last_note + Interval(interval)
+                next_note_down = last_note - Interval(interval)
+
+                # Sprawdzamy czy nuty się mieszczą się w zadanym przez użytkownika
+                up_in_ambitus = next_note_up.between(self.ambitus['lowest'], self.ambitus['highest'])
+                down_in_ambitus = next_note_down.between(self.ambitus['lowest'], self.ambitus['highest'])
+
+                if up_in_ambitus and down_in_ambitus:
+                    elem = random.choice([next_note_up, next_note_down])
+                    break
+                elif up_in_ambitus:
+                    elem = next_note_up
+                    break
+                elif down_in_ambitus:
+                    elem = next_note_down
+                    break
+
+            note_template = Note.random(shortest_duration)
+            note_template.note = elem.note
+            note_template.octave = elem.octave
+
+            return note_template
 
     def get_last_note_idx(self) -> int:
         """
@@ -239,6 +276,15 @@ class Generator:
             Number of shortest_note_duration notes that we have to fill
         """
         return self.bar_count * self.metre[0] * (self.shortest_note_duration // self.metre[1])
+
+    def get_normalized_intervals_probability(self) -> List[float]:
+        """
+        Zwróć listę prawdopodobieństw znormalizowanych do jedynki
+
+        Returns:
+            Lista prawdopodobieństw znormalizowanych do jedynki
+        """
+        return [item / 100 for item in self.probability]
 
     # endregion
 
@@ -403,7 +449,7 @@ class Generator:
         # Generate all other objects
         while length_to_fill > 0:
             # Generate random writeable with specified maximum length
-            writeable = self.get_random_writeable(length_to_fill)
+            writeable = self.get_next_writeable(length_to_fill)
             length_to_fill -= writeable.get_duration(self.shortest_note_duration)
             self.generated_data.append(writeable)
 
@@ -413,6 +459,7 @@ class Generator:
             self.generated_data[last_note_idx].note = self.end_note.note
             self.generated_data[last_note_idx].octave = self.end_note.octave
         except NoNotesError:
+            # TODO: Obsłużyć
             # print(termcolor.colored('The are no notes in the generated file! Something went wrong?', 'red'))
             pass
 
