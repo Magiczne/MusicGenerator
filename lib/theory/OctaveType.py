@@ -10,11 +10,11 @@ class OctaveType(Enum):
     GREAT = ','
     SMALL = ''
     LINE_1 = '\''
-    LINE_2 = '\'\'\''
-    LINE_3 = '\'\'\'\''
-    LINE_4 = '\'\'\'\'\''
-    LINE_5 = '\'\'\'\'\'\''
-    LINE_6 = '\'\'\'\'\'\'\''
+    LINE_2 = '\'\''
+    LINE_3 = '\'\'\''
+    LINE_4 = '\'\'\'\''
+    LINE_5 = '\'\'\'\'\''
+    LINE_6 = '\'\'\'\'\'\''
 
     @staticmethod
     def get_id(octave_type: OctaveType) -> int:
@@ -35,10 +35,10 @@ class OctaveType(Enum):
     @staticmethod
     def from_id(octave_id: int) -> OctaveType:
         if octave_id < 0:
-            raise KeyError('You will not hear that! Too low!')
+            return OctaveType.DOUBLE_CONTRA
 
         if octave_id > 10:
-            raise KeyError('You will not hear that! Too high!')
+            return OctaveType.LINE_6
 
         return [
             OctaveType.DOUBLE_CONTRA,
