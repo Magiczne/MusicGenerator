@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Tuple, Union
 import copy
 # import termcolor
-import sys
+import math
 import random
 import numpy as np
 
@@ -32,7 +32,8 @@ class Generator:
             'lowest': Note('c', OctaveType.SMALL),
             'highest': Note('c', OctaveType.LINE_4)
         }
-        self.rest_probability = 0.5
+        self.rest_probability: float = 0.5
+        self.max_consecutive_rests = math.inf
 
         # Parametry występowania interwałów
         self.intervals: List[str] = [
@@ -42,6 +43,9 @@ class Generator:
 
         # Wygenerowane dane
         self.generated_data: List[Writeable] = []
+
+        # Zmienne pomocnicze
+        self._consecutive_rests = 0
 
     # region Static
 
@@ -154,6 +158,20 @@ class Generator:
 
         return self
 
+    def set_max_consecutive_rests(self, count: Optional[int]):
+        """
+        Ustaw maksymalną liczbę pauz możliwych do wystąpienia po sobie
+
+        Args:
+            count:  Ilość pauz lub None jeśli pomijamy limit
+        """
+        if count is None:
+            self.max_consecutive_rests = math.inf
+        else:
+            self.max_consecutive_rests = count
+
+        return self
+
     def set_interval_probability(self, interval: str, probability: int):
         """
         Set probability for specified interval
@@ -206,14 +224,14 @@ class Generator:
             IndexError:     Gdy brakuje nuty na podstawie której można wygenerować następny element
             TypeError:      Gdy ostatnim elementem nie jest nuta
         """
-        # TODO: PRZEMYSLEC
-        # 1. Jak zapobiec dużej ilości pauz następujących po sobie
-
         generate_rest = np.random.choice([True, False], p=[self.rest_probability, 1 - self.rest_probability])
 
-        if generate_rest:
+        if generate_rest and self._consecutive_rests < self.max_consecutive_rests:
+            self._consecutive_rests += 1
             return Rest.random(shortest_duration)
         else:
+            self._consecutive_rests = 0
+
             last_note_idx = self.get_last_note_idx()
 
             if last_note_idx == -1:
