@@ -1,7 +1,11 @@
+from __future__ import annotations
 from typing import List, Optional
+import random
 
+import lib
 from lib.theory.RestModifier import RestModifier
 from lib.theory.Writeable import Writeable
+from lib.errors import InvalidNoteDuration
 
 
 class Rest(Writeable):
@@ -70,3 +74,56 @@ class Rest(Writeable):
         """
         self.modifiers.remove(modifier)
         return self
+
+    @staticmethod
+    def random(shortest_duration: Optional[int] = None) -> Rest:
+        """
+        Wygeneruj pauzę z losowymi parametrami
+
+        Args:
+            shortest_duration:  Najkrótsza możliwa wartość rytmiczna, która może wystąpić
+
+        Returns:
+            Pauza z losowymi parametrami
+
+        Raises:
+            InvalidNoteDuration:    Gdy shortest_duration nie jest poprawną długością bazową nuty
+        """
+
+        # Jeśli nie był podany parametr najkrótszej nuty, to zakładamy że najkrótszą możliwą wartością rytmiczną
+        # jest ta, która jest najmniejsza możliwa do wystąpienia w generatorze
+        if shortest_duration is None:
+            shortest_duration = lib.Generator.shortest_note_duration
+
+        # Pobieramy listę dostępnych wartości rytmicznych i tworzymy listę dostępnych modyfikatorów
+        available_notes = lib.Generator.get_available_note_lengths(shortest_duration=shortest_duration)
+        available_mods = []
+
+        base_duration = random.choice(available_notes)
+        has_mod = random.choice([True, False])
+
+        rest = Rest(base_duration=base_duration)
+
+        # Jeśli długość nuty jest najkrótsza jaką możemy uzyskać, to nie możemy dodać modyfikatora wydłużającego,
+        # gdyż kropka lub podwójna kropka doda mniejszą wartość rytmiczną
+        if base_duration >= lib.Generator.shortest_note_duration:
+            has_mod = False
+
+        # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna pauza z kropką, to do dostępnych
+        # modyfikatorów możemy dodać przedłużenie w postaci kropki
+        if shortest_duration >= rest.get_duration(lib.Generator.shortest_note_duration) * 1.5:
+            available_mods.append(RestModifier.DOT)
+
+        # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna pauza z podwójną kropką, to do
+        # dostępnych modyfikatorów możemy dodać przedłużenie w postaci podwójnej kropki.
+        # Sprawdzamy również, czy nie jest to przedostatnia dostępna wartośc rytmiczna. Jeśli tak jest, to nie możemy
+        # dodać podwójnej kropki, gdyż skutkowałoby to dodaniem pauzy o połowę mniejszej wartości rytmicznej niż
+        # dozwolona
+        if shortest_duration >= rest.get_duration(lib.Generator.shortest_note_duration) * 1.75 \
+                and rest.base_duration > 2 * lib.Generator.shortest_note_duration:
+            available_mods.append(RestModifier.DOUBLE_DOT)
+
+        if has_mod and len(available_mods) > 0:
+            rest.add_modifier(random.choice(available_mods))
+
+        return rest

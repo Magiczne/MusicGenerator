@@ -215,26 +215,19 @@ class NoteTests(unittest.TestCase):
     # region random
 
     def test_random_correct_duration(self):
-        durations = lib.Generator.correct_note_lengths
-        shortest_duration = durations[-1]
+        lib.Generator.set_shortest_note_duration(16)
 
         for i in range(50):
-            note = Note.random(shortest_duration)
-            self.assertGreaterEqual(note.get_duration(shortest_duration), 1)
+            note = Note.random(16)
+            self.assertGreaterEqual(note.get_duration(lib.Generator.shortest_note_duration), 1)
 
         for i in range(50):
             note = Note.random()
-            self.assertGreaterEqual(note.get_duration(shortest_duration), 1)
-
-        shortest_duration = durations[0]
+            self.assertGreaterEqual(note.get_duration(lib.Generator.shortest_note_duration), 1)
 
         for i in range(50):
-            note = Note.random(shortest_duration)
-            self.assertEqual(note.get_duration(shortest_duration), 1)
-
-    def test_random_invalid_duration(self):
-        with self.assertRaises(InvalidNoteDuration):
-            Note.random(5)
+            note = Note.random(1)
+            self.assertEqual(note.get_duration(lib.Generator.shortest_note_duration), 1)
 
     # endregion
 

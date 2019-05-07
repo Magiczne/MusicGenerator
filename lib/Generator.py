@@ -47,10 +47,10 @@ class Generator:
         if shortest_duration is None:
             shortest_duration = Generator.shortest_note_duration
 
-        if shortest_duration not in Generator.correct_note_lengths:
-            raise InvalidNoteDuration(shortest_duration)
-
-        return [i for i in Generator.correct_note_lengths if i <= shortest_duration]
+        return [
+            i for i in Generator.correct_note_lengths
+            if Generator.shortest_note_duration / i <= shortest_duration and i <= Generator.shortest_note_duration
+        ]
 
     @staticmethod
     def set_shortest_note_duration(duration: int):
