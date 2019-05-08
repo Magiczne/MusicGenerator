@@ -323,7 +323,7 @@ class Generator:
         if base_duration.is_integer():
                 elem.base_duration = int(base_duration)
                 divided.append(elem)
-                duration -= base_duration
+                duration -= self.shortest_note_duration / base_duration
         else:
             while duration > 0:
                 elem_2 = copy.deepcopy(elem)
