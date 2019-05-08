@@ -322,23 +322,36 @@ class Generator:
             Lista nut mieszcząca się w takcie o podanej długości 
         """
         base_duration = self.shortest_note_duration / duration
+        print(duration, self.shortest_note_duration, base_duration)
         divided: List[Writeable] = []
         
         if base_duration.is_integer():
+                print("elo")
+                if NoteModifier.DOT in elem.modifiers:
+                    elem.remove_modifier(NoteModifier.DOT)
+
+                if NoteModifier.DOUBLE_DOT in elem.modifiers:
+                    elem.remove_modifier(NoteModifier.DOUBLE_DOT)    
                 elem.base_duration = int(base_duration)
                 divided.append(elem)
+                print(divided)
                 duration -= self.shortest_note_duration / base_duration
+                print(duration)
         else:
             while duration > 0:
                 elem_2 = copy.deepcopy(elem)
                 # ile podstawowych długości zmieści się w takcie
                 closest_whole = max([val for val in Generator.correct_note_lengths if val <= duration])
+                print(closest_whole)
                 # przeliczenie jaka to nuta
                 closest_whole_base = self.shortest_note_duration // closest_whole
+                print(closest_whole_base)
                 elem_2.base_duration = int(closest_whole_base)
                 divided.append(elem_2)
                 #zmieniamy wartość pozostałą do wypełnienia
+                print(divided)
                 duration -= int(elem_2.get_duration(self.shortest_note_duration))
+                print(duration)
                 # sprawdzamy czy jakiś element został już wpisany do taktu i czy należy dodać do niego kropkę
                 # lub podwójną kropkę 
                 if duration == divided[-1].get_duration(self.shortest_note_duration) * 0.5:
@@ -346,7 +359,7 @@ class Generator:
                     divided[-1].add_modifier(NoteModifier.DOT)
                     duration -= int(modifier_duration)
                 
-                if duration == divided[-1].get_duration(self.shortest_note_duration) * 0.75:
+                if duration >= divided[-1].get_duration(self.shortest_note_duration) * 0.75:
                     modifier_duration = divided[-1].get_duration(self.shortest_note_duration) * 0.75
                     divided[-1].add_modifier(NoteModifier.DOUBLE_DOT) 
                     duration -= int(modifier_duration)
@@ -367,7 +380,6 @@ class Generator:
             Drugim elementem jest lista obiektów, która ma się pojawić w drugim takcie.   
         """
         second_duration = elem.get_duration(self.shortest_note_duration) - first_duration
-        
         # kopiujemy parametry nuty aby móc później przypisać odpowiednią wartość do drugiego taktu
         elem_2 = copy.deepcopy(elem)
         first_bar: List[Writeable] = self.divide_element(elem, first_duration)
@@ -414,20 +426,13 @@ class Generator:
                 notes_split[bar_nr].append(note)
             else:
                 data: Tuple[List[Writeable], List[Writeable]] = self.split_note(note, value_to_fill)
-                print(bar_nr)
                 notes_split[bar_nr].extend(data[0])
-                print(notes_split)
                 bar_nr += 1
                 value_filled = 0
                 for elem in data[1]:
                     value_filled += elem.get_duration(self.shortest_note_duration)
-                value_to_fill = (self.get_length_to_fill() / self.bar_count) - value_filled    
-                print(bar_nr)
-                # for elem in data[1]:
-                #     notes_split[bar_nr].append(elem)
-                notes_split[bar_nr] = data[1]
-                print(notes_split) 
-                print(value_to_fill)  
+                value_to_fill = (self.get_length_to_fill() / self.bar_count) - value_filled 
+                notes_split[bar_nr] = data[1] 
 
         return notes_split
 
