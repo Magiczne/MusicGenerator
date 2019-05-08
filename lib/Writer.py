@@ -172,8 +172,11 @@ class Writer:
         f.write(content)
         f.close()
 
-    def compile(self):
-        """Kompiluj plik źródłowy do pdfa"""
+    def compile(self, ext: str = 'pdf'):
+        """Kompiluj plik źródłowy do wybranego rodzaju pliku"""
+        if ext not in ['pdf', 'png', 'ps']:
+            raise AttributeError('Extension is not supported. Choose from pdf, png or ps')
+
         if not os.path.isdir(self.source_dir):
             raise NotADirectoryError
 
@@ -183,7 +186,7 @@ class Writer:
         if not os.path.isdir(self.compiled_dir):
             os.makedirs(self.compiled_dir, exist_ok=True)
 
-        os.system('lilypond -o {} {}/{}.ly'.format(self.compiled_dir, self.source_dir, self.filename))
+        os.system(f'lilypond --format={ext} -o {self.compiled_dir} {self.source_dir}/{self.filename}.ly')
 
     # endregion
 
