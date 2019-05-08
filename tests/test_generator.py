@@ -25,7 +25,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(Note('c', OctaveType.SMALL), self.generator.ambitus['lowest'])
         self.assertEqual(Note('c', OctaveType.LINE_4), self.generator.ambitus['highest'])
         self.assertEqual(0.5, self.generator.rest_probability)
-        self.assertEqual(100, sum(self.generator.probability))
+        self.assertEqual(100, sum(self.generator.intervals_probability))
 
     # region get_available_note_lengths
 
@@ -148,7 +148,7 @@ class GeneratorTests(unittest.TestCase):
     def test_set_interval_probability(self):
         self.generator.set_interval_probability('1cz', 10)
         idx = Interval.names().index('1cz')
-        self.assertEqual(10, self.generator.probability[idx])
+        self.assertEqual(10, self.generator.intervals_probability[idx])
 
     def test_set_invalid_interval_name(self):
         with self.assertRaises(errors.IntervalNotSupported):
@@ -162,7 +162,7 @@ class GeneratorTests(unittest.TestCase):
         probabilities = [10, 5, 5, 10, 5, 5, 10, 10, 5, 5, 10, 10, 5, 5]
 
         self.generator.set_intervals_probability(probabilities)
-        self.assertEqual(probabilities, self.generator.probability)
+        self.assertEqual(probabilities, self.generator.intervals_probability)
 
     def test_set_intervals_probability_invalid_length(self):
         probabilities = [0, 1, 2]

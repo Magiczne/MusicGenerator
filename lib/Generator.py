@@ -35,8 +35,9 @@ class Generator:
         self.rest_probability: float = 0.5
         self.max_consecutive_rests = math.inf
 
-        # Parametry występowania interwałów
-        self.probability: List[int] = [8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
+        # Parametry występowania interwałów i nut w obrębie oktawy
+        self.intervals_probability: List[int] = [8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
+        self.notes_probability: List[int] = [9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8]
 
         # Wygenerowane dane
         self.generated_data: List[Writeable] = []
@@ -191,7 +192,7 @@ class Generator:
         """
         if interval in Interval.names():
             idx = Interval.names().index(interval)
-            self.probability[idx] = probability
+            self.intervals_probability[idx] = probability
         else:
             raise IntervalNotSupported(interval)
 
@@ -208,13 +209,34 @@ class Generator:
             ValueError:     Jeśli prawdopodobieństwa nie sumują się do 100, lub jeśli długośc listy nie odpowiada
                             ilości wszystkich dostępnych interwałów
         """
-        if len(probabilities) == len(Interval.names()):
-            if sum(probabilities) == 100:
-                self.probability = probabilities
-            else:
-                raise ValueError('Probabilities does not sum to 100')
-        else:
+        if len(probabilities) != len(Interval.names()):
             raise ValueError('You have not specified probabilities for all intervals')
+
+        if sum(probabilities) != 100:
+            raise ValueError('Probabilities does not sum to 100')
+
+        self.intervals_probability = probabilities
+
+        return self
+
+    def set_notes_probability(self, probabilities: List[int]):
+        """
+        Ustaw wartości prawdopodobieństwa wystąpienia dla nut w obrębie oktawy. Wartości muszą się sumować do 100
+
+        Args:
+             probabilities: Lista prawdopodobieństw
+
+        Raises:
+            ValueError:     Jeśli prawdopodobieństwa nie sumują się do 100, lub jeśli długośc listy nie odpowiada
+                            ilości dźwieków dostępnych w ramach oktawy
+        """
+        if len(probabilities) != 12:
+            raise ValueError('You have not specified probabilities for all notes')
+
+        if sum(probabilities) != 100:
+            raise ValueError('Probabilities does not sum to 100')
+
+        self.notes_probability = probabilities
 
         return self
 
@@ -262,7 +284,15 @@ class Generator:
                 down_in_ambitus = next_note_down.between(self.ambitus['lowest'], self.ambitus['highest'])
 
                 if up_in_ambitus and down_in_ambitus:
-                    elem = random.choice([next_note_up, next_note_down])
+                    # Jeśli obie z nut które zostały wygenerowane mieszczą się w ambitusie to korzystamy z
+                    # prawdopodobieństw wystąpienia dźwieków w ramach oktawy
+                    up_probability = self.notes_probability[next_note_up.get_id() % 12]
+                    down_probability = self.notes_probability[next_note_down.get_id() % 12]
+
+                    up_normalized_probability = up_probability / (up_probability + down_probability)
+                    probabilities = [up_normalized_probability, 1 - up_normalized_probability]
+
+                    elem = np.random.choice([next_note_up, next_note_down], p=probabilities)
                     break
                 elif up_in_ambitus:
                     elem = next_note_up
@@ -306,7 +336,7 @@ class Generator:
         Returns:
             Lista prawdopodobieństw znormalizowanych do jedynki
         """
-        return [item / 100 for item in self.probability]
+        return [item / 100 for item in self.intervals_probability]
 
     # endregion
 
