@@ -11,7 +11,7 @@ from lib.theory.Note import Note
 from lib.theory.Rest import Rest
 from lib.theory.Writeable import Writeable
 from lib.theory.NoteModifier import NoteModifier
-from lib.errors import InvalidBaseNoteDuration, NoNotesError, InvalidMetre, IntervalNotSupported
+from lib.errors import InvalidBaseNoteDuration, NoNotesError, InvalidMetre, IntervalNotSupported, NoteOutsideAmbitus
 
 
 class Generator:
@@ -112,7 +112,6 @@ class Generator:
 
         return self
 
-    # TODO: Check czy się mieści w ambitusie
     def set_start_note(self, note: Note):
         """
         Ustaw nutę początkową dla generowanej melodii
@@ -120,6 +119,9 @@ class Generator:
         Args:
             note:   Nuta początkowa
         """
+        if not note.between(self.ambitus['lowest'], self.ambitus['highest']):
+            raise NoteOutsideAmbitus(note, self.ambitus['lowest'], self.ambitus['highest'])
+
         self.start_note = note
         return self
 
@@ -130,10 +132,12 @@ class Generator:
         Args:
             note:   Nuta końcowa
         """
+        if not note.between(self.ambitus['lowest'], self.ambitus['highest']):
+            raise NoteOutsideAmbitus(note, self.ambitus['lowest'], self.ambitus['highest'])
+
         self.end_note = note
         return self
 
-    # TODO: Sprawdzić czy ambitus się nie odwrócił
     def set_ambitus(self, lowest: Optional[Note] = None, highest: Optional[Note] = None):
         """
         Ustaw ambitus generowanej melodii
@@ -143,9 +147,15 @@ class Generator:
              highest:   Najwyższa nuta możliwa do wystąpienia
         """
         if lowest is not None:
+            if lowest > self.ambitus['highest']:
+                raise ValueError(f'Note is higher than current highest note')
+
             self.ambitus['lowest'] = lowest
 
         if highest is not None:
+            if highest < self.ambitus['lowest']:
+                raise ValueError('Note is lower than current lowest note')
+
             self.ambitus['highest'] = highest
 
         return self

@@ -3,3 +3,4 @@ from lib.errors.IntervalNotSupported import IntervalNotSupported
 from lib.errors.InvalidBaseNoteDuration import InvalidBaseNoteDuration
 from lib.errors.InvalidMetre import InvalidMetre
 from lib.errors.NoNotesError import NoNotesError
+from lib.errors.NoteOutsideAmbitus import NoteOutsideAmbitus
