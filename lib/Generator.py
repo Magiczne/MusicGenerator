@@ -352,36 +352,29 @@ class Generator:
             Lista nut mieszcząca się w takcie o podanej długości 
         """
         base_duration = self.shortest_note_duration / duration
-        print(duration, self.shortest_note_duration, base_duration)
         divided: List[Writeable] = []
         
         if base_duration.is_integer():
-                print("elo")
                 if NoteModifier.DOT in elem.modifiers:
                     elem.remove_modifier(NoteModifier.DOT)
 
                 if NoteModifier.DOUBLE_DOT in elem.modifiers:
-                    elem.remove_modifier(NoteModifier.DOUBLE_DOT)    
+                    elem.remove_modifier(NoteModifier.DOUBLE_DOT) 
+
                 elem.base_duration = int(base_duration)
                 divided.append(elem)
-                print(divided)
                 duration -= self.shortest_note_duration / base_duration
-                print(duration)
         else:
             while duration > 0:
                 elem_2 = copy.deepcopy(elem)
                 # ile podstawowych długości zmieści się w takcie
                 closest_whole = max([val for val in Generator.correct_note_lengths if val <= duration])
-                print(closest_whole)
                 # przeliczenie jaka to nuta
                 closest_whole_base = self.shortest_note_duration // closest_whole
-                print(closest_whole_base)
                 elem_2.base_duration = int(closest_whole_base)
                 divided.append(elem_2)
                 #zmieniamy wartość pozostałą do wypełnienia
-                print(divided)
                 duration -= int(elem_2.get_duration(self.shortest_note_duration))
-                print(duration)
                 # sprawdzamy czy jakiś element został już wpisany do taktu i czy należy dodać do niego kropkę
                 # lub podwójną kropkę 
                 if duration == divided[-1].get_duration(self.shortest_note_duration) * 0.5:
