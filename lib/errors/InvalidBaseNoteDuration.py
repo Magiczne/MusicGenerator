@@ -1,5 +1,5 @@
-class InvalidNoteDuration(Exception):
-    """Raised when note base duration is not an invalid duration"""
+class InvalidBaseNoteDuration(Exception):
+    """Zgłaszany, gdy długość nuty nie jest poprawną bazową wartością rytmiczną"""
 
     def __init__(self, duration):
         super().__init__()

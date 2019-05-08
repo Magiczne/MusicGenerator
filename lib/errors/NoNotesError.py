@@ -1,5 +1,5 @@
 class NoNotesError(Exception):
-    """Raised when there is no notes in the generated data list"""
+    """Zgłaszany gdy w liście brakuje nut"""
 
     def __init__(self):
         super().__init__()

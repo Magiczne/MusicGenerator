@@ -11,14 +11,11 @@ class Writeable(abc.ABC):
         super().__init__()
 
     @abc.abstractmethod
-    def get_duration(self, minimum_note_length: int = 16) -> float:
+    def get_duration(self, base_duration: int = 16) -> float:
         """
-        Get note value in the minimum_note_length count
+        Pobierz długość nuty wyrażonej w ilości base_duration
 
         Args:
-            minimum_note_length:    Minimum note length in which we duration will be calculated
-
-        Returns:
-            Note duration in the minimum_note_length count
+            base_duration:    Bazowa wartość rytmiczna, na podstawie której będą wykonywane obliczenia
         """
         pass    # pragma: no cover

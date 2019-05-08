@@ -2,6 +2,7 @@ from typing import List
 import unittest
 
 from lib.Generator import Generator
+from lib.theory.Interval import Interval
 from lib.theory.Note import Note
 from lib.theory.NoteModifier import NoteModifier
 from lib.theory.OctaveType import OctaveType
@@ -55,7 +56,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual((4, 4), self.generator.metre)
 
     def test_invalid_metre(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(errors.InvalidMetre):
             self.generator.set_metre(1, 3)
 
     # endregion
@@ -79,7 +80,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(8, self.generator.shortest_note_duration)
 
     def test_set_invalid_note_duration(self):
-        with self.assertRaises(errors.InvalidNoteDuration):
+        with self.assertRaises(errors.InvalidBaseNoteDuration):
             self.generator.set_shortest_note_duration(3)
 
     # endregion
@@ -146,11 +147,11 @@ class GeneratorTests(unittest.TestCase):
 
     def test_set_interval_probability(self):
         self.generator.set_interval_probability('1cz', 10)
-        idx = self.generator.intervals.index('1cz')
+        idx = Interval.names().index('1cz')
         self.assertEqual(10, self.generator.probability[idx])
 
     def test_set_invalid_interval_name(self):
-        with self.assertRaises(KeyError):
+        with self.assertRaises(errors.IntervalNotSupported):
             self.generator.set_interval_probability('1czz', 10)
 
     # endregion
@@ -170,8 +171,7 @@ class GeneratorTests(unittest.TestCase):
             self.generator.set_intervals_probability(probabilities)
 
     def test_set_intervals_probability_more_than_one_hundred(self):
-        intervals = self.generator.intervals
-        probabilities = [5 for _ in intervals]
+        probabilities = [5 for _ in Interval.names()]
 
         with self.assertRaises(ValueError):
             self.generator.set_intervals_probability(probabilities)

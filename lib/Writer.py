@@ -17,38 +17,38 @@ class Writer:
     # region Data appending utils
 
     def blank(self):
-        """Add blank line to the output file"""
+        """Dodaj pustą linię"""
         self.lines.append('')
 
     def line(self, data: str, indent: int = 0):
         """
-        Add line with content to the output data
+        Dodaj linię z zawartością
 
         Args:
-            data:   Line data
-            indent: Number of tabs indentation
+            data:   Zawartość linii
+            indent: Rozmiar wcięcia
         """
         indent_str = self.get_indent(indent)
         self.lines.append('{}{}'.format(indent_str, data))
 
     def command(self, data: str, indent: int = 0):
         """
-        Add command line to the output data (starting with the '\' character)
+        Dodaj linię komendy (zaczynającą się znakiem '\')
 
         Args:
-             data:      Command data
-             indent:    Number of tabs indentation
+            data:   Zawartość komendy
+            indent: Rozmiar wcięcia
         """
         indent_str = self.get_indent(indent)
         self.lines.append('{}\\{}'.format(indent_str, data))
 
     def block_start(self, name: Optional[str] = None, indent: int = 0):
         """
-        Add block start with optional block name to the output data
+        Dodaj rozpoczęcie bloku
 
         Args:
-            name:   Optional block name
-            indent: Number of tabs indentation
+            name:   Opcjonalna nazwa bloku
+            indent: Rozmiar wcięcia
         """
         if name is None:
             self.line('{', indent)
@@ -57,10 +57,10 @@ class Writer:
 
     def block_end(self, indent: int = 0):
         """
-        Add block end to the output data
+        Dodaj zakończenie bloku
 
         Args:
-             indent:    Number of tabs indentation
+             indent: Rozmiar wcięcia
         """
         self.line('}', indent)
 
@@ -71,26 +71,20 @@ class Writer:
     @staticmethod
     def get_indent(indent: int) -> str:
         """
-        Get indentation in string format
+        Pobierz tekstową reprezentację wcięcia
 
         Args:
-            indent:     Number of tabs indentation
-
-        Returns:
-            String with number of specified tabs
+            indent: Rozmiar wcięcia
         """
         return '' if indent <= 0 else '\t' * indent
 
     @staticmethod
     def get_bar(bar_type: BarType) -> str:
         """
-        Get string value for bar based on type
+        Pobierz reprezentację tekstową wybranej kreski taktowej
 
         Args:
-             bar_type:  Bar type
-
-        Returns:
-            String representation of bar type
+             bar_type:  Rodzaj kreski taktowej
         """
         return '\\bar "{}"'.format(bar_type.value)
 
@@ -100,11 +94,11 @@ class Writer:
 
     def header(self, paper_size: str = 'a4', show_bar_numbers: bool = True):
         """
-        Add typical lilypond header to the output data. You can specify paper size and disable bar numbers
+        Wygeneruj typowy nagłówek pliku lilyponda
 
         Args:
-            paper_size:         Paper size
-            show_bar_numbers:   Determine if bar numbers should be shown
+            paper_size:         Rozmiar papieru
+            show_bar_numbers:   Jeśli True na wygenerowanych nutach będzie widoczna numeracja taktów
         """
         self.command('version "2.18.2"')
         self.blank()
@@ -115,7 +109,7 @@ class Writer:
 
         if not show_bar_numbers:
             self.block_start('layout')
-            self.line('indent = 0\in', indent=1)
+            self.line('indent = 0\\in', indent=1)
             self.line('ragged-last = ##f', indent=1)
             self.command('context {', indent=1)
             self.command('Score', indent=2)
@@ -126,23 +120,23 @@ class Writer:
 
     def time_signature(self, n: int, m: int, indent: int = 0):
         """
-        Add time signature to the output data
+        Dodaj metrum
 
         Args:
-            n:          Number of notes
-            m:          Note rytmical value
-            indent:     Number of tabs indentation
+            n:      Liczba nut
+            m:      Wartość rytmiczna nut
+            indent: Rozmiar wcięcia
         """
         self.command('time {}/{}'.format(n, m), indent)
 
     def key_signature(self, key: str, key_type: KeyType, indent: int = 0):
         """
-        Add key signature to the output data
+        Dodaj oznaczenie tonacji
 
         Args:
-            key:        Key primary note
-            key_type:   Key type (minor/major)
-            indent:     Number of tabs indentation
+            key:        Tonacja
+            key_type:   Rodzaj tonacji (molowa/durowa)
+            indent:     Rozmiar wcięcia
         """
         self.command('key {} \\{}'.format(key, key_type.value), indent)
 
@@ -152,24 +146,24 @@ class Writer:
 
     def set_source_dir(self, source_dir: str):
         """
-        Set directory for generated lilypond sources
+        Ustaw folder na pliki źródłowe lilyponda
 
         Args:
-            source_dir:     Directory path
+            source_dir:     Ścieżka do folderu
         """
         self.source_dir = source_dir.rstrip('/')
 
     def set_compiled_dir(self, compiled_dir: str):
         """
-        Set directory for compiled lilypond files
+        Ustaw folder na pliki docelowe
 
         Args:
-            compiled_dir:   Directory path
+            compiled_dir:   Ścieżka do folderu
         """
         self.compiled_dir = compiled_dir.rstrip('/')
 
     def export(self):
-        """Export lilypond file"""
+        """Wyeksportuj dane do pliku lilyponda"""
         if not os.path.isdir(self.source_dir):
             os.makedirs(self.source_dir, exist_ok=True)
 
@@ -179,7 +173,7 @@ class Writer:
         f.close()
 
     def compile(self):
-        """Compile lilypond file to pdf"""
+        """Kompiluj plik źródłowy do pdfa"""
         if not os.path.isdir(self.source_dir):
             raise NotADirectoryError
 
@@ -195,10 +189,10 @@ class Writer:
 
     def parse(self, bars: List[List[Writeable]]):
         """
-        Parse list of bars and place it into the output data.
+        Parsuj i dodaj listę taktów
 
         Args:
-            bars:   List of bars containing notes to parse into output data
+            bars:   Lista taktów
         """
         for i, bar in enumerate(bars):
             notes = ' '.join([str(item) for item in bar])

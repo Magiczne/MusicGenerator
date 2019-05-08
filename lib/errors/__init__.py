@@ -1,2 +1,5 @@
-from lib.errors.InvalidNoteDuration import InvalidNoteDuration
+from lib.errors.BaseDurationTooLarge import BaseDurationTooLarge
+from lib.errors.IntervalNotSupported import IntervalNotSupported
+from lib.errors.InvalidBaseNoteDuration import InvalidBaseNoteDuration
+from lib.errors.InvalidMetre import InvalidMetre
 from lib.errors.NoNotesError import NoNotesError

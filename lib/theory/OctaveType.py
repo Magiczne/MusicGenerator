@@ -18,6 +18,7 @@ class OctaveType(Enum):
 
     @staticmethod
     def get_id(octave_type: OctaveType) -> int:
+        """Pobierz identyfikator przypisany do konkretnej oktawy"""
         return {
             OctaveType.DOUBLE_CONTRA: 0,
             OctaveType.SUB_CONTRA: 1,
@@ -34,6 +35,10 @@ class OctaveType(Enum):
 
     @staticmethod
     def from_id(octave_id: int) -> OctaveType:
+        """
+        Zwróć oktawę na podstawie identyfikatora. Jeśli identyfikator wychodzi poza zakres zwracana jest najbliższa
+        oktawa:
+        """
         if octave_id < 0:
             return OctaveType.DOUBLE_CONTRA
 
@@ -56,9 +61,11 @@ class OctaveType(Enum):
 
     @staticmethod
     def get_octave_down(octave_type: OctaveType) -> OctaveType:
+        """Pobierz niższą oktawę"""
         return OctaveType.from_id(OctaveType.get_id(octave_type) - 1)
 
     @staticmethod
     def random() -> OctaveType:
+        """Pobierz losową oktawę"""
         idx = random.randint(0, 10)
         return OctaveType.from_id(idx)

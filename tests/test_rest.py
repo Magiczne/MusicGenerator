@@ -53,7 +53,7 @@ class RestTests(unittest.TestCase):
 
     def test_get_duration(self):
         rest = Rest()
-        lengths = [64, 32, 16, 8, 4, 2, 1]
+        lengths = [64, 32, 16, 8, 4]
 
         for length in lengths:
             self.assertEqual(length / 4, rest.get_duration(length))
@@ -61,7 +61,7 @@ class RestTests(unittest.TestCase):
     def test_get_duration_with_dot(self):
         rest = Rest()
         rest.add_modifier(RestModifier.DOT)
-        lengths = [64, 32, 16, 8, 4, 2, 1]
+        lengths = [64, 32, 16, 8]
 
         for length in lengths:
             self.assertEqual(length / 4 + length / 8, rest.get_duration(length))
@@ -69,7 +69,7 @@ class RestTests(unittest.TestCase):
     def test_get_duration_with_double_dot(self):
         rest = Rest()
         rest.add_modifier(RestModifier.DOUBLE_DOT)
-        lengths = [64, 32, 16, 8, 4, 2, 1]
+        lengths = [64, 32, 16]
 
         for length in lengths:
             self.assertEqual(length / 4 + length / 8 + length / 16, rest.get_duration(length))

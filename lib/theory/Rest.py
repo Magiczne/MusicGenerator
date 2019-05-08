@@ -5,7 +5,8 @@ import random
 import lib
 from lib.theory.RestModifier import RestModifier
 from lib.theory.Writeable import Writeable
-from lib.errors import InvalidNoteDuration
+from lib.errors import InvalidBaseNoteDuration
+from lib.errors import BaseDurationTooLarge
 
 
 class Rest(Writeable):
@@ -28,29 +29,39 @@ class Rest(Writeable):
     def __repr__(self):
         return f'Rest <{self.__str__()}>'
 
-    def get_duration(self, minimum_note_length: int = 16) -> float:
+    def get_duration(self, base_duration: int = 16) -> int:
         """
-        Get note value in the minimum_note_length count
+        Pobierz długośc pauzy wyrażonej w ilości base_duration
 
         Args:
-            minimum_note_length:    Minimum note length in which we duration will be calculated
+            base_duration:     Bazowa wartość rytmiczna, na podstawie której będą wykonywane obliczenia
 
-        Returns:
-            Note duration in the minimum_note_length count
+        Raises:
+            InvalidBaseNoteDuration:        Jeśli base_duration nie jest poprawną bazową wartością rytmiczną
+            BaseDurationTooLarge:           Jeśli base_duration jest dłuższą wartością rytmiczną niż self.base_duration
         """
-        rest_duration = minimum_note_length / self.base_duration
+        if base_duration not in lib.Generator.correct_note_lengths:
+            raise InvalidBaseNoteDuration(base_duration)
+
+        if self.base_duration > base_duration:
+            raise BaseDurationTooLarge(self.base_duration, base_duration)
+
+        rest_duration = base_duration / self.base_duration
+
         if RestModifier.DOT in self.modifiers:
             rest_duration = rest_duration * 1.5
         elif RestModifier.DOUBLE_DOT in self.modifiers:
             rest_duration = rest_duration * 1.75
-        return rest_duration
+
+        return int(rest_duration)
 
     def add_modifier(self, modifier: RestModifier):
         """
-        Add modifier to the rest if it is not present
+        Dodaj modyfikator do listy modyfikatorów, jeśli już takiego nie ma.
+        Jeśli dodawana jest kropka lub podwójna kropka, to odpowiednio nadpisana zostaje podwójna kropka lub kropka
 
         Args:
-            modifier:   Modifier to be added
+            modifier:   Modyfikator do dodania
         """
         if modifier not in self.modifiers:
             self.modifiers.append(modifier)
@@ -67,36 +78,34 @@ class Rest(Writeable):
 
     def remove_modifier(self, modifier: RestModifier):
         """
-        Remove modifier if it is present
+        Usuń modyfikator, jeśli znajduje się w liście modyfikatorów
 
         Args:
-            modifier:   Modifier to be removed
+            modifier:   Modyfikator do usunięcia
         """
         self.modifiers.remove(modifier)
         return self
 
     @staticmethod
-    def random(shortest_duration: Optional[int] = None) -> Rest:
+    def random(longest_duration: Optional[int] = None) -> Rest:
         """
-        Wygeneruj pauzę z losowymi parametrami
+        Wygeneruj pauzę z losowymi parametrami o maksymalnej długości podanej w parametrze
 
         Args:
-            shortest_duration:  Najkrótsza możliwa wartość rytmiczna, która może wystąpić
+            longest_duration:   Najdłuższa możliwa wartośc rytmiczna, która może wystąpić podana w ilości
+                                lib.Generator.shortest_note_duration.
+                                Jeśli nie podano, skrypt zakłada że nuta o każdej długości jest dozwolona.
 
         Returns:
-            Pauza z losowymi parametrami
-
-        Raises:
-            InvalidNoteDuration:    Gdy shortest_duration nie jest poprawną długością bazową nuty
+            Pauza z losowymi parametrami o maksymalnej długości wynoszącej longest_duration
         """
-
-        # Jeśli nie był podany parametr najkrótszej nuty, to zakładamy że najkrótszą możliwą wartością rytmiczną
-        # jest ta, która jest najmniejsza możliwa do wystąpienia w generatorze
-        if shortest_duration is None:
-            shortest_duration = lib.Generator.shortest_note_duration
+        # Jeśli nie był podany parametr najdłuższej możliwej wartości rytmicznej, to zakładamy że nuta o każdej długości
+        # jest dozwolona do wygenerowania
+        if longest_duration is None:
+            longest_duration = lib.Generator.shortest_note_duration
 
         # Pobieramy listę dostępnych wartości rytmicznych i tworzymy listę dostępnych modyfikatorów
-        available_notes = lib.Generator.get_available_note_lengths(shortest_duration=shortest_duration)
+        available_notes = lib.Generator.get_available_note_lengths(longest_duration=longest_duration)
         available_mods = []
 
         base_duration = random.choice(available_notes)
@@ -111,7 +120,7 @@ class Rest(Writeable):
 
         # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna pauza z kropką, to do dostępnych
         # modyfikatorów możemy dodać przedłużenie w postaci kropki
-        if shortest_duration >= rest.get_duration(lib.Generator.shortest_note_duration) * 1.5:
+        if longest_duration >= rest.get_duration(lib.Generator.shortest_note_duration) * 1.5:
             available_mods.append(RestModifier.DOT)
 
         # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna pauza z podwójną kropką, to do
@@ -119,7 +128,7 @@ class Rest(Writeable):
         # Sprawdzamy również, czy nie jest to przedostatnia dostępna wartośc rytmiczna. Jeśli tak jest, to nie możemy
         # dodać podwójnej kropki, gdyż skutkowałoby to dodaniem pauzy o połowę mniejszej wartości rytmicznej niż
         # dozwolona
-        if shortest_duration >= rest.get_duration(lib.Generator.shortest_note_duration) * 1.75 \
+        if longest_duration >= rest.get_duration(lib.Generator.shortest_note_duration) * 1.75 \
                 and rest.base_duration > 2 * lib.Generator.shortest_note_duration:
             available_mods.append(RestModifier.DOUBLE_DOT)
 

@@ -1,4 +1,9 @@
+from __future__ import annotations
+from typing import List
+
+
 class Interval:
+    # Liczba półtonów odpowiadająca każdemu z interwałów
     interval_semitones = {
         '1cz': 0,
         '2m': 1,
@@ -16,6 +21,7 @@ class Interval:
         '8cz': 12
     }
 
+    # Lista używana do tworzenia interwałów komplementarnych
     interval_inversion = {
         'cz': 'cz',
         'zmn': 'zw',
@@ -25,7 +31,8 @@ class Interval:
     }
 
     @staticmethod
-    def names():
+    def names() -> List[str]:
+        """Zwraca listę dostępnych interwałów w formie tekstowej"""
         return list(Interval.interval_semitones.keys())
 
     def __init__(self, name: str):
@@ -43,7 +50,13 @@ class Interval:
     def __repr__(self):
         return f'Interval <{self.__str__()}>'
 
-    def get_complement_interval(self):
+    def get_complement_interval(self) -> Interval:
+        """
+        Zwraca interwał komplementarny. Przykładowo dla 1cz zwraca 8cz
+
+        Returns:
+            Interwał komplementarny.
+        """
         complement_degree = 9 - self.degrees
         complement_quality = self.interval_inversion[self.quality]
         return Interval(f'{complement_degree}{complement_quality}')

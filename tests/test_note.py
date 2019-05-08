@@ -5,7 +5,7 @@ from lib.theory.Interval import Interval
 from lib.theory.Note import Note
 from lib.theory.NoteModifier import NoteModifier
 from lib.theory.OctaveType import OctaveType
-from lib.errors import InvalidNoteDuration
+from lib.errors import InvalidBaseNoteDuration
 
 
 class NoteTests(unittest.TestCase):
@@ -235,7 +235,7 @@ class NoteTests(unittest.TestCase):
 
     def test_get_duration(self):
         note = Note('c', base_duration=4)
-        lengths = [64, 32, 16, 8, 4, 2, 1]
+        lengths = [64, 32, 16, 8, 4]
 
         for length in lengths:
             self.assertEqual(length / 4, note.get_duration(length))
@@ -243,7 +243,7 @@ class NoteTests(unittest.TestCase):
     def test_get_duration_with_dot(self):
         note = Note('c', base_duration=4)
         note.add_modifier(NoteModifier.DOT)
-        lengths = [64, 32, 16, 8, 4, 2, 1]
+        lengths = [64, 32, 16, 8]
 
         for length in lengths:
             self.assertEqual(length / 4 + length / 8, note.get_duration(length))
@@ -251,7 +251,7 @@ class NoteTests(unittest.TestCase):
     def test_get_duration_with_double_dot(self):
         note = Note('c', base_duration=4)
         note.add_modifier(NoteModifier.DOUBLE_DOT)
-        lengths = [64, 32, 16, 8, 4, 2, 1]
+        lengths = [64, 32, 16]
 
         for length in lengths:
             self.assertEqual(length / 4 + length / 8 + length / 16, note.get_duration(length))
@@ -259,7 +259,7 @@ class NoteTests(unittest.TestCase):
     def test_get_duration_raises_exception(self):
         note = Note('c')
 
-        with self.assertRaises(InvalidNoteDuration):
+        with self.assertRaises(InvalidBaseNoteDuration):
             note.get_duration(5)
 
     # endregion

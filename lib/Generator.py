@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Tuple, Union
 import copy
-# import termcolor
+import termcolor
 import math
 import random
 import numpy as np
@@ -11,7 +11,7 @@ from lib.theory.Note import Note
 from lib.theory.Rest import Rest
 from lib.theory.Writeable import Writeable
 from lib.theory.NoteModifier import NoteModifier
-from lib.errors import InvalidNoteDuration, NoNotesError
+from lib.errors import InvalidBaseNoteDuration, NoNotesError, InvalidMetre, IntervalNotSupported
 
 
 class Generator:
@@ -36,9 +36,6 @@ class Generator:
         self.max_consecutive_rests = math.inf
 
         # Parametry występowania interwałów
-        self.intervals: List[str] = [
-            '1cz', '2m', '2w', '3m', '3w', '4cz', '4zw', '5zmn', '5cz', '6m', '6w', '7m', '7w', '8cz'
-        ]
         self.probability: List[int] = [8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
 
         # Wygenerowane dane
@@ -50,27 +47,36 @@ class Generator:
     # region Static
 
     @staticmethod
-    def get_available_note_lengths(shortest_duration: Optional[int] = None):
-        if shortest_duration is None:
-            shortest_duration = Generator.shortest_note_duration
+    def get_available_note_lengths(longest_duration: Optional[int] = None):
+        """
+        Zwraca listę dostępnych wartości rytmicznych na podstawie maksymalnej długości nuty podanej w ilości
+        lib.Generator.shortest_note_duration
+
+        Args:
+            longest_duration:   Najdłuższa możliwa wartośc rytmiczna, która może wystąpić podana w ilości
+                                lib.Generator.shortest_note_duration.
+                                Jeśli nie podano, skrypt zakłada że nuta o każdej długości jest dozwolona.
+        """
+        if longest_duration is None:
+            longest_duration = Generator.shortest_note_duration
 
         return [
             i for i in Generator.correct_note_lengths
-            if Generator.shortest_note_duration / i <= shortest_duration and i <= Generator.shortest_note_duration
+            if Generator.shortest_note_duration / i <= longest_duration and i <= Generator.shortest_note_duration
         ]
 
     @staticmethod
     def set_shortest_note_duration(duration: int):
         """
-        Set shortest note duration
+        Ustaw najkrótszą dozwoloną wartość rytmiczną
 
         Args:
-            duration:   Shortest note duration
+            duration:   Wartość rytmiczna
         """
-        if duration in Generator.correct_note_lengths:
-            Generator.shortest_note_duration = duration
-        else:
-            raise InvalidNoteDuration(duration)
+        if duration not in Generator.correct_note_lengths:
+            raise InvalidBaseNoteDuration(duration)
+
+        Generator.shortest_note_duration = duration
 
     # endregion
 
@@ -78,60 +84,62 @@ class Generator:
 
     def set_metre(self, n: int, m: int):
         """
-        Set metre
+        Ustaw metrum
 
         Args:
-            n:  Number of notes
-            m:  Note rhythmic value
+            n:  Liczba nut
+            m:  Wartość rytmiczna nut
         """
         if m in self.correct_metre_rhythmic_values:
             self.metre = (n, m)
         else:
-            raise ValueError()
+            raise InvalidMetre((n, m))
 
         return self
 
     def set_bar_count(self, bar_count: int):
         """
-        Set bar count
+        Ustaw ilość taktów do wygenerowania
 
         Args:
-            bar_count:  Bar count
+            bar_count:  Ilość taktów
         """
         if bar_count >= 1:
             self.bar_count = bar_count
         else:
-            raise ValueError()
+            raise ValueError('Bar count has to be larger than 0')
 
         return self
 
+    # TODO: Check czy się mieści w ambitusie
     def set_start_note(self, note: Note):
         """
-        Set note on which script will start generating notes
+        Ustaw nutę początkową dla generowanej melodii
 
         Args:
-            note:   Starting note
+            note:   Nuta początkowa
         """
         self.start_note = note
         return self
 
     def set_end_note(self, note: Note):
         """
-        Set note on which script will finish generating notes
+        Ustaw nutę końcową dla generowanej melodii
 
         Args:
-            note:   Finishing note
+            note:   Nuta końcowa
         """
         self.end_note = note
         return self
 
+    # TODO: Sprawdzić czy ambitus się nie odwrócił
     def set_ambitus(self, lowest: Optional[Note] = None, highest: Optional[Note] = None):
         """
-        Set ambitus
+        Ustaw ambitus generowanej melodii
 
         Args:
-             lowest:    Optional value for lowest note
-             highest:   Optional value for highest note
+             lowest:    Najniższa możliwa do wystąpienia
+             highest:   Najwyższa nuta możliwa do wystąpienia
         """
         if lowest is not None:
             self.ambitus['lowest'] = lowest
@@ -174,34 +182,39 @@ class Generator:
 
     def set_interval_probability(self, interval: str, probability: int):
         """
-        Set probability for specified interval
+        Ustaw prawdopodobieństwo wystąpienia dla konkretnego interwału. Wartości prawdopodobieństw mają sumować się
+        do 100, więc wartość tego prawdopodobieństwa też powinna być wybrana w taki sposób.
 
         Args:
-            interval:       Interval name
-            probability:    Probability for specified interval
+            interval:       Nazwa interwału
+            probability:    Prawdopodobieństwo wystąpienia
         """
-        if interval in self.intervals:
-            idx = self.intervals.index(interval)
+        if interval in Interval.names():
+            idx = Interval.names().index(interval)
             self.probability[idx] = probability
         else:
-            raise KeyError    
+            raise IntervalNotSupported(interval)
 
         return self
 
     def set_intervals_probability(self, probabilities: List[int]):
         """
-        Set probabilities for all intervals at once
+        Ustaw wartości prawdopodobieństwa wystąpienia dla wszystkich interwałów. Wartości muszą sumować się do 100.
 
         Args:
-            probabilities:  List of probabilities. All values should be summed to 100
+            probabilities:  Lista prawdopodobieństw
+
+        Raises:
+            ValueError:     Jeśli prawdopodobieństwa nie sumują się do 100, lub jeśli długośc listy nie odpowiada
+                            ilości wszystkich dostępnych interwałów
         """
-        if len(probabilities) == len(self.intervals):
+        if len(probabilities) == len(Interval.names()):
             if sum(probabilities) == 100:
                 self.probability = probabilities
             else:
-                raise ValueError 
+                raise ValueError('Probabilities does not sum to 100')
         else:
-            raise ValueError
+            raise ValueError('You have not specified probabilities for all intervals')
 
         return self
 
@@ -209,7 +222,7 @@ class Generator:
 
     # region Utility methods
 
-    def get_next_writeable(self, shortest_duration: int) -> Writeable:
+    def get_next_writeable(self, longest_duration: int) -> Writeable:
         """
         Wygeneruj losowy element (nutę lub pauzę) ograniczony poprzez maksymalną wartość rytmiczną,
         która może wystąpić.
@@ -217,26 +230,21 @@ class Generator:
         znajduje się conajmniej jedna nuta!
 
         Args:
-            shortest_duration:      Najkrótsza możliwa do wystąpienia wartość rytmiczna, podana w ilości
+            longest_duration:       Najkrótsza możliwa do wystąpienia wartość rytmiczna, podana w ilości
                                     shortest_note_duration
 
         Raises:
-            IndexError:     Gdy brakuje nuty na podstawie której można wygenerować następny element
             TypeError:      Gdy ostatnim elementem nie jest nuta
         """
         generate_rest = np.random.choice([True, False], p=[self.rest_probability, 1 - self.rest_probability])
 
         if generate_rest and self._consecutive_rests < self.max_consecutive_rests:
             self._consecutive_rests += 1
-            return Rest.random(shortest_duration)
+            return Rest.random(longest_duration=longest_duration)
         else:
             self._consecutive_rests = 0
 
             last_note_idx = self.get_last_note_idx()
-
-            if last_note_idx == -1:
-                raise IndexError
-
             last_note = self.generated_data[last_note_idx]
 
             if not isinstance(last_note, Note):
@@ -245,7 +253,7 @@ class Generator:
             # Losujemy do momentu, aż któraś z nut nie będzie się mieścić w naszym przedziale
             while True:
                 # Wybieramy losowy interwał i tworzymy dwie nuty, jedną w górę drugą w dół o wylosowany interwał
-                interval = np.random.choice(self.intervals, p=self.get_normalized_intervals_probability())
+                interval = np.random.choice(Interval.names(), p=self.get_normalized_intervals_probability())
                 next_note_up = last_note + Interval(interval)
                 next_note_down = last_note - Interval(interval)
 
@@ -263,7 +271,7 @@ class Generator:
                     elem = next_note_down
                     break
 
-            note_template = Note.random(shortest_duration)
+            note_template = Note.random(longest_duration=longest_duration)
             note_template.note = elem.note
             note_template.octave = elem.octave
 
@@ -271,11 +279,10 @@ class Generator:
 
     def get_last_note_idx(self) -> int:
         """
-        Get the index of a last note in the set of writeable objects
+        Pobierz indeks ostatniej nuty w liście wygenerowanych elementów
 
         Returns:
-            Index if found
-            -1 if not found
+            Indeks jeśli znaleziono nutę
 
         Raises:
             NoNotesError:   When there are no notes in the generated data
@@ -288,10 +295,7 @@ class Generator:
 
     def get_length_to_fill(self) -> int:
         """
-        Get how many of the shortest_note_duration we have to generate
-
-        Returns:
-            Number of shortest_note_duration notes that we have to fill
+        Pobierz ile nut o bazowej wartości rytmicznej równej self.shortest_note_duration zmieści musimy wygenerować
         """
         return self.bar_count * self.metre[0] * (self.shortest_note_duration // self.metre[1])
 
@@ -429,57 +433,51 @@ class Generator:
 
     def group_bars(self, bars: List[List[Writeable]]) -> List[List[Writeable]]:
         """
-        Perform grouping on each bar of notes according to the musical grouping rules
+        Pogrupuj nuty w taktach zgodnie z zasadami grupowania
 
         Args:
-            bars:   List of bars of notes
+            bars:   Lista taktów do pogrupowania
 
         Returns:
-            Grouped list of bars of notes
+            Pogrupowana lista taktów
         """
         # TODO: Implementacja grupowania nut wewnątrz taktów według zasad grupowania zależnie od metrum
         pass
 
     def generate(self, group: bool = False) -> Union[List[Writeable], List[List[Writeable]]]:
         """
-        Generate list of notes based on previously set parameters
+        Wygeneruj listę nut bazując na ustalonych parametrach.
 
         Args:
-            group:  If true returned notes will be split into bars and grouped according to the music rules
-
-        Returns:
-            List of generated notes
+            group:  Jeżeli True to zwrócona melodia będzie już pogrupowana zgodnie z zasadami muzyki i rozbita na takty
         """
-
-        # Cleanup generated data
+        # Resetujemy wygenerowane dane
         self.generated_data = []
 
-        # Number of the shortest notes to be filled
+        # Długośc którą mamy wygenerować podaną w ilości najkrótszej wartości rytmicznej, która może wystąpić
         length_to_fill = self.get_length_to_fill()
 
-        # User have specified start note, so we start from it only randomizing duration
+        # Generujemy pierwszą nutę a następnie podmieniamy jej wysokość na tą, którą wybrał użytkownik wybierając
+        # nutę początkową
         start_note = Note.random(self.shortest_note_duration)
         start_note.note = self.start_note.note
         start_note.octave = self.start_note.octave
         self.generated_data.append(start_note)
         length_to_fill -= start_note.get_duration(self.shortest_note_duration)
 
-        # Generate all other objects
+        # Generujemy elementy dopóki w takcie znajduje się miejsce
         while length_to_fill > 0:
-            # Generate random writeable with specified maximum length
             writeable = self.get_next_writeable(length_to_fill)
             length_to_fill -= writeable.get_duration(self.shortest_note_duration)
             self.generated_data.append(writeable)
 
-        # Find the last generated note and replace note and octave values
+        # Znajdujemy ostatnią nutę i podmieniamy jej wysokość, tak aby zgadzało się to z wyborem użytkownika
         try:
             last_note_idx = self.get_last_note_idx()
             self.generated_data[last_note_idx].note = self.end_note.note
             self.generated_data[last_note_idx].octave = self.end_note.octave
         except NoNotesError:
-            # TODO: Obsłużyć
-            # print(termcolor.colored('The are no notes in the generated file! Something went wrong?', 'red'))
-            pass
+            print(termcolor.colored('The are no notes in the generated file! Something went wrong?', 'red'))
 
         if group:
             bars = self.split_to_bars(self.generated_data)
