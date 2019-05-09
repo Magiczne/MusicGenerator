@@ -279,8 +279,7 @@ class Generator:
             last_note_idx = self.get_last_note_idx()
             last_note = self.generated_data[last_note_idx]
 
-            if not isinstance(last_note, Note):
-                raise TypeError
+            assert isinstance(last_note, Note)
 
             # Losujemy do momentu, aż któraś z nut nie będzie się mieścić w naszym przedziale
             while True:
