@@ -5,7 +5,7 @@ from lib.theory.Interval import Interval
 from lib.theory.Note import Note
 from lib.theory.NoteModifier import NoteModifier
 from lib.theory.OctaveType import OctaveType
-from lib.errors import InvalidBaseNoteDuration
+from lib.errors import BaseDurationTooLarge, InvalidBaseNoteDuration
 
 
 class NoteTests(unittest.TestCase):
@@ -78,12 +78,6 @@ class NoteTests(unittest.TestCase):
                 new_note = note + Interval(intervals[j])
                 self.assertEqual(expected[i][j], new_note.note)
 
-    def test_add_unsupported(self):
-        note = Note('c')
-
-        with self.assertRaises(NotImplementedError):
-            note + 5
-
     def test_sub_interval(self):
         note = Note('c')
 
@@ -100,12 +94,6 @@ class NoteTests(unittest.TestCase):
         for i in range(len(expected)):
             new_note: Note = note - Interval(intervals[i])
             self.assertEqual(expected[i], new_note.note)
-
-    def test_sub_unsupported(self):
-        note = Note('c')
-
-        with self.assertRaises(NotImplementedError):
-            note - 5
 
     # endregion
 
@@ -258,11 +246,17 @@ class NoteTests(unittest.TestCase):
         for length in lengths:
             self.assertEqual(length / 4 + length / 8 + length / 16, note.get_duration(length))
 
-    def test_get_duration_raises_exception(self):
+    def test_get_duration_raises_invalid_note_duration(self):
         note = Note('c')
 
         with self.assertRaises(InvalidBaseNoteDuration):
             note.get_duration(5)
+
+    def test_get_duration_raises_base_duration_too_large(self):
+        note = Note('c', base_duration=4)
+
+        with self.assertRaises(BaseDurationTooLarge):
+            note.get_duration(2)
 
     # endregion
 
@@ -307,6 +301,24 @@ class NoteTests(unittest.TestCase):
         self.assertEqual(2, len(note.modifiers))
         self.assertEqual(NoteModifier.TIE, note.modifiers[1])
         self.assertEqual(NoteModifier.DOT, note.modifiers[0])
+
+    # endregion
+
+    # region between
+
+    def test_between(self):
+        low = Note('c', OctaveType.LINE_1)
+        mid = Note('c', OctaveType.LINE_2)
+        high = Note('c', OctaveType.LINE_3)
+
+        self.assertTrue(mid.between(low, high))
+
+    def test_between_swap_low_and_high(self):
+        low = Note('c', OctaveType.LINE_1)
+        mid = Note('c', OctaveType.LINE_2)
+        high = Note('c', OctaveType.LINE_3)
+
+        self.assertTrue(mid.between(high, low))
 
     # endregion
 

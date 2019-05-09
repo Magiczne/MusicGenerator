@@ -1,5 +1,6 @@
 from typing import List
 import unittest
+import math
 
 from lib.Generator import Generator
 from lib.theory.Interval import Interval
@@ -92,14 +93,24 @@ class GeneratorTests(unittest.TestCase):
         self.generator.set_start_note(note)
         self.assertEqual(note, self.generator.start_note)
 
+    def test_set_start_note_raises_note_outside_ambitus(self):
+        note = Note('c', OctaveType.SUB_CONTRA)
+        with self.assertRaises(errors.NoteOutsideAmbitus):
+            self.generator.set_start_note(note)
+
     # endregion
 
     # region set_end_note
 
     def test_set_end_note(self):
-        note = Note('c')
+        note = Note('c', OctaveType.LINE_2)
         self.generator.set_end_note(note)
         self.assertEqual(note, self.generator.end_note)
+
+    def test_set_end_note_raises_note_outside_ambitus(self):
+        note = Note('c', OctaveType.LINE_6)
+        with self.assertRaises(errors.NoteOutsideAmbitus):
+            self.generator.set_end_note(note)
 
     # endregion
 
@@ -129,6 +140,13 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(lowest, self.generator.ambitus['lowest'])
         self.assertEqual(highest, self.generator.ambitus['highest'])
 
+    def test_set_ambitus_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.generator.set_ambitus(lowest=Note('c', OctaveType.LINE_6))
+
+        with self.assertRaises(ValueError):
+            self.generator.set_ambitus(highest=Note('c', OctaveType.SUB_CONTRA))
+
     # endregion
 
     # region set_rest_probability
@@ -140,6 +158,20 @@ class GeneratorTests(unittest.TestCase):
     def test_set_rest_probability_raises_value_error(self):
         with self.assertRaises(ValueError):
             self.generator.set_rest_probability(1.5)
+
+    # endregion
+
+    # region set_max_consecutive_rests
+
+    def test_set_max_consecutive_rests(self):
+        self.generator.set_max_consecutive_rests(5)
+        self.assertEqual(5, self.generator.max_consecutive_rests)
+
+        self.generator.set_max_consecutive_rests(None)
+        self.assertEqual(math.inf, self.generator.max_consecutive_rests)
+
+        self.generator.set_max_consecutive_rests(3)
+        self.assertEqual(3, self.generator.max_consecutive_rests)
 
     # endregion
 
@@ -175,6 +207,23 @@ class GeneratorTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.generator.set_intervals_probability(probabilities)
+
+    # endregion
+
+    # region set_notes_probability
+
+    def test_set_notes_probability(self):
+        probabilities = [1, 1, 9, 9, 16, 8, 16, 8, 8, 8, 8, 8]
+
+        self.generator.set_notes_probability(probabilities)
+        self.assertEqual(probabilities, self.generator.notes_probability)
+
+    def test_set_notes_probability_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.generator.set_notes_probability([100])
+
+        with self.assertRaises(ValueError):
+            self.generator.set_notes_probability([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 
     # endregion
 

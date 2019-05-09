@@ -158,6 +158,17 @@ class WriterTests(unittest.TestCase):
 
         os.removedirs(self.writer.source_dir)
 
+    def test_compile_invalid_extension(self):
+        self.writer.header()
+        self.writer.export()
+
+        with self.assertRaises(AttributeError):
+            self.writer.compile('jpg')
+
+        # Cleanup
+        os.remove('{}/{}.ly'.format(self.writer.source_dir, self.writer.filename))
+        os.removedirs(self.writer.source_dir)
+
     # endregion
 
     def test_parse(self):

@@ -214,7 +214,7 @@ class Note(Writeable):
 
             return Note(f'{new_base_note}{self.create_accidentals_string(id_difference)}', new_octave)
         else:
-            raise NotImplementedError('This operation is not implemented')
+            raise NotImplementedError('This operation is not implemented')  # pragma: no cover
 
     def __sub__(self, other):
         if isinstance(other, Interval):
@@ -223,7 +223,7 @@ class Note(Writeable):
 
             return octave_lower + other.get_complement_interval()
         else:
-            raise NotImplementedError('This operation is not implemented')
+            raise NotImplementedError('This operation is not implemented')  # pragma: no cover
 
     def __eq__(self, other):
         return self.__class__ == other.__class__ and str(self) == str(other)
@@ -232,25 +232,25 @@ class Note(Writeable):
         if isinstance(other, Note):
             return self.get_id() < other.get_id()
         else:
-            raise NotImplementedError('This operation is not implemented')
+            raise NotImplementedError('This operation is not implemented')  # pragma: no cover
 
     def __le__(self, other):
         if isinstance(other, Note):
             return self.get_id() <= other.get_id()
         else:
-            raise NotImplementedError('This operation is not implemented')
+            raise NotImplementedError('This operation is not implemented')  # pragma: no cover
 
     def __gt__(self, other):
         if isinstance(other, Note):
             return self.get_id() > other.get_id()
         else:
-            raise NotImplementedError('This operation is not implemented')
+            raise NotImplementedError('This operation is not implemented')  # pragma: no cover
 
     def __ge__(self, other):
         if isinstance(other, Note):
             return self.get_id() >= other.get_id()
         else:
-            raise NotImplementedError('This operation is not implemented')
+            raise NotImplementedError('This operation is not implemented')  # pragma: no cover
 
     # endregion
 
