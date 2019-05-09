@@ -152,12 +152,65 @@ class Note(Writeable):
             new_octave_id = OctaveType.get_id(self.octave) + int(self.get_base_note() in self.base_notes[8 - other.degrees:])
             new_octave = OctaveType.from_id(new_octave_id)
 
+            # Na podstawie naszego nowego ID wyliczamy pozycję naszej nuty w oktawie
+            # new_id % 12 zwraca indeks od 0 do 11 co obrazuje która to nuta w oktawie
+            # Następnie odejmujemy od tego nowe ID nuty bazowej
             id_difference = new_id % 12 - new_base_note_id
+
+            # Wstępna redukcja ilości znaków chromatycznych do maksymalnie trzech
+            if id_difference > 3:
+                id_difference -= 12
 
             if id_difference < -3:
                 id_difference += 12
-            if id_difference > 3:
-                id_difference -= 12
+
+            # Jeśli otrzymaliśmy nutę o więcej niż 3 bemolach, to musimy zredukować tą ilość do maksymalnie dwóch
+            while id_difference <= -3:
+                # Znajdujemy poprzednią nutę bazową
+                previous_base_note_idx = new_base_note_idx - 1
+                previous_base_note = self.base_notes[previous_base_note_idx]
+                previous_base_note_id = self.base_notes_ids[previous_base_note]
+
+                # Liczmy różnicę w półtonach między tymi nutami (jeśli indeks jest równy -1 to znaczy że przeszliśmy z
+                # nuty c na nutę b i sposób obliczania różnicy w półtonach będzie inny
+                if previous_base_note_idx == -1:
+                    semitones_diff = 12 - previous_base_note_id
+                else:
+                    semitones_diff = new_base_note_id - previous_base_note_id
+
+                # Ustawiamy na nowo parametry nuty.
+                # Jeśli miałaby wystąpić kolejna iteracja pętli to zostaną użyte do zredukowania znaków chromatycznych
+                # W przeciwnym wypadku zostaną użyte do stworzenia nowej nuty
+                new_base_note_idx = previous_base_note_idx
+                new_base_note = previous_base_note
+                new_base_note_id = previous_base_note_id
+
+                id_difference += semitones_diff
+
+            # Jeśli otrzymaliśmy nutę o więcej niż 3 krzyżykach, to musimy zredukować tą ilość do maksymalnie dwóch
+            while id_difference >= 3:
+                # Znajdujemy następną nutę bazową
+                next_base_note_idx = new_base_note_idx + 1
+                if next_base_note_idx == len(self.base_notes):
+                    next_base_note_idx = 0
+                next_base_note = self.base_notes[next_base_note_idx]
+                next_base_note_id = self.base_notes_ids[next_base_note]
+
+                # Liczymy różnicę w półtonach między tymi nutami (jeśli indeks jest równy 0 to znaczy że przeszliśmy z
+                # nuty b na nutę c i sposób obliczania różnicy w półtonach będzie inny
+                if next_base_note_idx == 0:
+                    semitones_diff = 12 - new_base_note_id
+                else:
+                    semitones_diff = next_base_note_id - new_base_note_id
+
+                # Ustawiamy na nowo parametry nuty
+                # Jeśli miałaby wystąpić kolejna iteracja pętli to zostaną użyte do zredukowania znaków chromatycznych
+                # W przeciwnym wypadku zostaną użyte do stworzenia nowej nuty
+                new_base_note_idx = next_base_note_idx
+                new_base_note = next_base_note
+                new_base_note_id = next_base_note_id
+
+                id_difference -= semitones_diff
 
             return Note(f'{new_base_note}{self.create_accidentals_string(id_difference)}', new_octave)
         else:

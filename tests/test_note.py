@@ -60,21 +60,23 @@ class NoteTests(unittest.TestCase):
     # region __add__ / __sub__
 
     def test_add_interval(self):
-        note = Note('c')
-
+        notes = ['c', 'f', 'fes', 'feses', 'fis', 'eisis']
+        expected = [
+            ['c', 'des', 'd', 'ees', 'e', 'f', 'fis', 'ges', 'g', 'aes', 'a', 'bes', 'b', 'c'],
+            ['f', 'ges', 'g', 'aes', 'a', 'bes', 'b', 'ces', 'c', 'des', 'd', 'ees', 'e', 'f'],
+            ['fes', 'geses', 'ges', 'aeses', 'aes', 'beses', 'bes', 'ceses', 'ces', 'deses', 'des', 'eeses', 'ees', 'fes'],
+            ['feses', 'fes', 'geses', 'ges', 'aeses', 'aes', 'beses', 'beses', 'ceses', 'ces', 'deses', 'des', 'eeses', 'feses'],
+            ['fis', 'g', 'gis', 'a', 'ais', 'b', 'bis', 'c', 'cis', 'd', 'dis', 'e', 'eis', 'fis'],
+            ['eisis', 'fisis', 'gis', 'gisis', 'ais', 'aisis', 'bis', 'bis', 'bisis', 'cisis', 'dis', 'disis', 'eis', 'eisis']
+        ]
         intervals = Interval.names()
-        expected = ['c', 'des', 'd', 'ees', 'e', 'f', 'fis', 'ges', 'g', 'aes', 'a', 'bes', 'b', 'c']
 
-        for i in range(len(expected)):
-            new_note: Note = note + Interval(intervals[i])
-            self.assertEqual(expected[i], new_note.note)
+        for i in range(len(notes)):
+            note = Note(notes[i])
 
-        note = Note('f')
-        expected = ['f', 'ges', 'g', 'aes', 'a', 'bes', 'b', 'ces', 'c', 'des', 'd', 'ees', 'e', 'f']
-
-        for i in range(len(expected)):
-            new_note: Note = note + Interval(intervals[i])
-            self.assertEqual(expected[i], new_note.note)
+            for j in range(len(expected[i])):
+                new_note = note + Interval(intervals[j])
+                self.assertEqual(expected[i][j], new_note.note)
 
     def test_add_unsupported(self):
         note = Note('c')
