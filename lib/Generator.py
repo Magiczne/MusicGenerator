@@ -349,30 +349,33 @@ class Generator:
 
     # endregion
 
+    # region Grouping
+
     def divide_element(self, elem: Writeable, duration: int) -> List[Writeable]:
         """
         Podział elementu i dodanie do niego kropek, jeśli jest to konieczne
 
         Args:
             elem: Element do podziału
-            duration: Długość miejsca w takcie, którą należy wypełnić 
+            duration: Długość miejsca w takcie, którą należy wypełnić
 
         Returns:
-            Lista nut mieszcząca się w takcie o podanej długości 
+            Lista nut mieszcząca się w takcie o podanej długości
         """
         base_duration = self.shortest_note_duration / duration
         divided: List[Writeable] = []
-        
+
+        # TODO: Buga znalazłem. Zakładasz że element jest nutą - co jeśli jest pauzą?
         if base_duration.is_integer():
-                if NoteModifier.DOT in elem.modifiers:
-                    elem.remove_modifier(NoteModifier.DOT)
+            if NoteModifier.DOT in elem.modifiers:
+                elem.remove_modifier(NoteModifier.DOT)
 
-                if NoteModifier.DOUBLE_DOT in elem.modifiers:
-                    elem.remove_modifier(NoteModifier.DOUBLE_DOT) 
+            if NoteModifier.DOUBLE_DOT in elem.modifiers:
+                elem.remove_modifier(NoteModifier.DOUBLE_DOT)
 
-                elem.base_duration = int(base_duration)
-                divided.append(elem)
-                duration -= self.shortest_note_duration / base_duration
+            elem.base_duration = int(base_duration)
+            divided.append(elem)
+            duration -= self.shortest_note_duration / base_duration
         else:
             while duration > 0:
                 elem_2 = copy.deepcopy(elem)
@@ -382,35 +385,36 @@ class Generator:
                 closest_whole_base = self.shortest_note_duration // closest_whole
                 elem_2.base_duration = int(closest_whole_base)
                 divided.append(elem_2)
-                #zmieniamy wartość pozostałą do wypełnienia
+                # zmieniamy wartość pozostałą do wypełnienia
                 duration -= int(elem_2.get_duration(self.shortest_note_duration))
                 # sprawdzamy czy jakiś element został już wpisany do taktu i czy należy dodać do niego kropkę
-                # lub podwójną kropkę 
+                # lub podwójną kropkę
                 if duration == divided[-1].get_duration(self.shortest_note_duration) * 0.5:
                     modifier_duration = divided[-1].get_duration(self.shortest_note_duration) * 0.5
                     divided[-1].add_modifier(NoteModifier.DOT)
                     duration -= int(modifier_duration)
-                
+
                 if duration >= divided[-1].get_duration(self.shortest_note_duration) * 0.75:
                     modifier_duration = divided[-1].get_duration(self.shortest_note_duration) * 0.75
-                    divided[-1].add_modifier(NoteModifier.DOUBLE_DOT) 
+                    divided[-1].add_modifier(NoteModifier.DOUBLE_DOT)
                     duration -= int(modifier_duration)
 
-        return divided             
+        return divided
 
     def split_note(self, elem: Writeable, first_duration: int) -> Tuple[List[Writeable], List[Writeable]]:
         """
-        Podział obiektu (nuty lub pauzy) na granicy kreski taktowej. 
+        Podział obiektu (nuty lub pauzy) na granicy kreski taktowej.
 
         Args:
             elem: Element do podziału
-            first_duration: Długość miejsca pozostałego w pierwszym takcie, wyrażona za pomocą ilości nut o 
+            first_duration: Długość miejsca pozostałego w pierwszym takcie, wyrażona za pomocą ilości nut o
                             najmniejszej mdozwolonej wartości (shortest_note_duration)
 
         Returns:
-            Krotka dwuelementowa. Pierwszym elementem jest lista obiektów, która ma się pojawić w pierwszym takcie. 
-            Drugim elementem jest lista obiektów, która ma się pojawić w drugim takcie.   
+            Krotka dwuelementowa. Pierwszym elementem jest lista obiektów, która ma się pojawić w pierwszym takcie.
+            Drugim elementem jest lista obiektów, która ma się pojawić w drugim takcie.
         """
+        # TODO: Tego samego buga masz tutaj
         second_duration = elem.get_duration(self.shortest_note_duration) - first_duration
         # kopiujemy parametry nuty aby móc później przypisać odpowiednią wartość do drugiego taktu
         elem_2 = copy.deepcopy(elem)
@@ -424,13 +428,13 @@ class Generator:
 
         for elem in second_bar:
             if isinstance(elem, Note):
-                elem.add_modifier(NoteModifier.TIE)        
+                elem.add_modifier(NoteModifier.TIE)
 
         # usuwamy łuk z ostatniej nuty
         if NoteModifier.TIE in second_bar[-1].modifiers:
-            second_bar[-1].remove_modifier(NoteModifier.TIE)                 
-        return  (first_bar, second_bar)  
+            second_bar[-1].remove_modifier(NoteModifier.TIE)
 
+        return first_bar, second_bar
 
     def split_to_bars(self, notes: List[Writeable]) -> List[List[Writeable]]:
         """
@@ -443,7 +447,7 @@ class Generator:
         Returns:
             List of bars of notes
         """
-        notes_split: List[List[Writeable]] = [[] for _ in range(self.bar_count)] # list of empty lists to fill
+        notes_split: List[List[Writeable]] = [[] for _ in range(self.bar_count)]  # list of empty lists to fill
         value_to_fill = self.get_length_to_fill() / self.bar_count  # total value to fill in a bar
         base_duration = self.shortest_note_duration
         bar_nr = 0  # number of currently filled bar
@@ -463,8 +467,8 @@ class Generator:
                 value_filled = 0
                 for elem in data[1]:
                     value_filled += elem.get_duration(self.shortest_note_duration)
-                value_to_fill = (self.get_length_to_fill() / self.bar_count) - value_filled 
-                notes_split[bar_nr] = data[1] 
+                value_to_fill = (self.get_length_to_fill() / self.bar_count) - value_filled
+                notes_split[bar_nr] = data[1]
 
         return notes_split
 
@@ -480,6 +484,8 @@ class Generator:
         """
         # TODO: Implementacja grupowania nut wewnątrz taktów według zasad grupowania zależnie od metrum
         pass
+
+    # endregion
 
     def generate(self, group: bool = False) -> Union[List[Writeable], List[List[Writeable]]]:
         """
