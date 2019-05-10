@@ -460,17 +460,149 @@ class GeneratorTests(unittest.TestCase):
 
     def test_group_bars_4_4(self):
         bars: List[List[Writeable]] = [
-            [Note('c'), Note('c', base_duration=2), Note('c')]
+            [Note('c', base_duration=1)],
+            [Note('c'), Note('c', base_duration=2), Note('c')],
+            [Note('c', base_duration=2), Note('c', base_duration=2)],
+            [Note('c', base_duration=2, modifiers=[NoteModifier.DOT]), Note('c')],
+            [Note('c', base_duration=2, modifiers=[NoteModifier.DOUBLE_DOT]), Note('c', base_duration=8)],
+            [Note('c'), Note('c', base_duration=8), Note('c', modifiers=[NoteModifier.DOT]), Note('c')]
         ]
 
-        with_tie = Note('c')
-        with_tie.add_modifier(NoteModifier.TIE)
         expected: List[List[Writeable]] = [
-            [Note('c'), with_tie, Note('c'), Note('c')]
+            [Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), Note('c', base_duration=2)],
+            [Note('c'), Note('c', modifiers=[NoteModifier.TIE]), Note('c'), Note('c')],
+            [Note('c', base_duration=2), Note('c', base_duration=2)],
+            [Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), Note('c'), Note('c')],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), Note('c', modifiers=[NoteModifier.TIE]),
+                Note('c', base_duration=8)
+            ],
+            [
+                Note('c'), Note('c', base_duration=8), Note('c', base_duration=8, modifiers=[NoteModifier.TIE]),
+                Note('c'), Note('c')
+            ]
         ]
 
-        grouped_bars: List[List[Writeable]] = self.generator.group_bars(bars)
+        grouped_bars = self.generator.group_bars(bars)
+        self.assertEqual(expected, grouped_bars)
 
+    def test_group_bars_5_4(self):
+        # Przyjmujemy założenie że 5/4 jest grupowane w sposób 3/4 + 2/4
+        bars: List[List[Writeable]] = [
+            [Note('c', base_duration=2, modifiers=[NoteModifier.DOT]), Note('c', base_duration=2)],
+            [Note('c', base_duration=1), Note('c')],
+            [Note('c', base_duration=2), Note('c', base_duration=2), Note('c')]
+        ]
+
+        expected: List[List[Writeable]] = [
+            [Note('c', base_duration=2, modifiers=[NoteModifier.DOT]), Note('c', base_duration=2)],
+            [Note('c', base_duration=2, modifiers=[NoteModifier.DOT, NoteModifier.TIE]), Note('c'), Note('c')],
+            [Note('c', base_duration=2), Note('c', modifiers=[NoteModifier.TIE]), Note('c'), Note('c')]
+        ]
+
+        grouped_bars = self.generator.group_bars(bars)
+        self.assertEqual(expected, grouped_bars)
+
+    def test_group_bars_6_4(self):
+        bars: List[List[Writeable]] = [
+            [Note('c', base_duration=2), Note('c', base_duration=2), Note('c', base_duration=2)],
+            [Note('c', base_duration=1), Note('c', base_duration=2)],
+            [
+                Note('c', modifiers=[NoteModifier.DOT]), Note('c', modifiers=[NoteModifier.DOT]),
+                Note('c', modifiers=[NoteModifier.DOT]), Note('c', modifiers=[NoteModifier.DOT])
+            ],
+            [
+                Note('c'), Note('c', base_duration=2, modifiers=[NoteModifier.DOUBLE_DOT]), Note('c', base_duration=8),
+                Note('c')
+            ]
+        ]
+
+        expected: List[List[Writeable]] = [
+            [
+                Note('c', base_duration=2), Note('c', modifiers=[NoteModifier.TIE]), Note('c'),
+                Note('c', base_duration=2)
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT, NoteModifier.TIE]), Note('c'),
+                Note('c', base_duration=2)
+            ],
+            [
+                Note('c', modifiers=[NoteModifier.DOT]), Note('c', modifiers=[NoteModifier.DOT]),
+                Note('c', modifiers=[NoteModifier.DOT]), Note('c', modifiers=[NoteModifier.DOT])
+            ],
+            [
+                Note('c'), Note('c', base_duration=2, modifiers=[NoteModifier.TIE]),
+                Note('c', modifiers=[NoteModifier.DOT]), Note('c', base_duration=8), Note('c')
+            ]
+        ]
+
+        grouped_bars = self.generator.group_bars(bars)
+        self.assertEqual(expected, grouped_bars)
+
+    def test_group_bars_7_4(self):
+        # Przyjmujemy założenie że 7/4 jest grupowane w sposób 3/4 + 2/4 + 2/4 = 3/4 + 4/4
+        bars: List[List[Writeable]] = [
+            [Note('c', base_duration=1), Note('c'), Note('c'), Note('c')],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c', base_duration=1)
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c'), Note('c', base_duration=2), Note('c')
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c', base_duration=2), Note('c', base_duration=2)
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]), Note('c')
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOUBLE_DOT]), Note('c', base_duration=8)
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c'), Note('c', base_duration=8), Note('c', modifiers=[NoteModifier.DOT]), Note('c')
+            ]
+        ]
+
+        expected: List[List[Writeable]] = [
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT, NoteModifier.TIE]),
+                Note('c'), Note('c'), Note('c'), Note('c')
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), Note('c', base_duration=2)
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c'), Note('c', modifiers=[NoteModifier.TIE]), Note('c'), Note('c')
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c', base_duration=2), Note('c', base_duration=2)
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), Note('c'), Note('c')
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), Note('c', modifiers=[NoteModifier.TIE]),
+                Note('c', base_duration=8)
+            ],
+            [
+                Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
+                Note('c'), Note('c', base_duration=8), Note('c', base_duration=8, modifiers=[NoteModifier.TIE]),
+                Note('c'), Note('c')
+            ]
+        ]
+
+        grouped_bars = self.generator.group_bars(bars)
         self.assertEqual(expected, grouped_bars)
 
     # endregion
