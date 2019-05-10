@@ -227,6 +227,46 @@ class GeneratorTests(unittest.TestCase):
 
     # endregion
 
+    # region set_durations_probability
+
+    def test_set_durations_probability(self):
+        probabilities = [13, 13, 13, 20, 11, 10, 20]
+
+        self.generator.set_durations_probability(probabilities)
+        self.assertEqual(probabilities, self.generator.durations_probability)
+
+    def test_set_durations_probability_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.generator.set_durations_probability([100])
+
+        with self.assertRaises(ValueError):
+            self.generator.set_durations_probability([1, 1, 1, 1, 1, 1, 1])
+
+    # endregion
+
+    # endregion
+
+    # region Random generation
+
+    # region get_random_note
+
+    def test_random_correct_duration(self):
+        self.generator.set_shortest_note_duration(16)
+
+        for i in range(50):
+            note = self.generator.get_random_note(16)
+            self.assertGreaterEqual(note.get_duration(self.generator.shortest_note_duration), 1)
+
+        for i in range(50):
+            note = self.generator.get_random_note()
+            self.assertGreaterEqual(note.get_duration(self.generator.shortest_note_duration), 1)
+
+        for i in range(50):
+            note = self.generator.get_random_note(1)
+            self.assertEqual(note.get_duration(self.generator.shortest_note_duration), 1)
+
+    # endregion
+
     # endregion
 
     # region Utility methods

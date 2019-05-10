@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import List, Optional
 import copy
-import random
 
 import lib
 from lib.theory.Interval import Interval
@@ -82,59 +81,6 @@ class Note(Writeable):
             return 'es' * (-value)
         else:
             return 'is' * value
-
-    @staticmethod
-    def random(longest_duration: Optional[int] = None) -> Note:
-        """
-        Wygeneruj nutę z losowymi parametrami o pewnej maksymalnej długości podanej w parametrze.
-
-        Args:
-            longest_duration:   Najdłuższa możliwa wartośc rytmiczna, która może wystąpić podana w ilości
-                                lib.Generator.shortest_note_duration.
-                                Jeśli nie podano, skrypt zakłada że nuta o każdej długości jest dozwolona.
-
-        Returns:
-            Nuta z losowymi parametrami o maksymalnej długości wynoszącej longest_duration
-        """
-        # Jeśli nie był podany parametr najdłuższej możliwej wartości rytmicznej, to zakładamy że nuta o każdej długości
-        # jest dozwolona do wygenerowania
-        if longest_duration is None:
-            longest_duration = lib.Generator.shortest_note_duration
-
-        # Pobieramy listę dostępnych wartości rytmicznych i tworzymy listę dostępnych modyfikatorów
-        available_notes = lib.Generator.get_available_note_lengths(longest_duration=longest_duration)
-        available_mods = []
-
-        base_note = random.choice(Note.base_notes)
-        octave = OctaveType.random()
-        base_duration = random.choice(available_notes)
-        has_mod = random.choice([True, False])
-
-        note = Note(note=base_note, octave=octave, base_duration=base_duration)
-
-        # Jeśli długość nuty jest najkrótsza jaką możemy uzyskać, to nie możemy dodać modyfikatora wydłużającego,
-        # gdyż kropka lub podwójna kropka doda mniejszą wartość rytmiczną
-        if base_duration >= lib.Generator.shortest_note_duration:
-            has_mod = False
-
-        # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna nuta z kropką, to do dostępnych
-        # modyfikatorów możemy dodać przedłużenie w postaci kropki
-        if longest_duration >= note.get_duration(lib.Generator.shortest_note_duration) * 1.5:
-            available_mods.append(NoteModifier.DOT)
-
-        # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna nuta z podwójną kropką, to do
-        # dostępnych modyfikatorów możemy dodać przedłużenie w postaci podwójnej kropki.
-        # Sprawdzamy również, czy nie jest to przedostatnia dostępna wartośc rytmiczna. Jeśli tak jest, to nie możemy
-        # dodać podwójnej kropki, gdyż skutkowałoby to dodaniem nuty o połowę mniejszej wartości rytmicznej niż
-        # dozwolona
-        if longest_duration >= note.get_duration(lib.Generator.shortest_note_duration) * 1.75 \
-                and note.base_duration > 2 * lib.Generator.shortest_note_duration:
-            available_mods.append(NoteModifier.DOUBLE_DOT)
-
-        if has_mod and len(available_mods) > 0:
-            note.add_modifier(random.choice(available_mods))
-
-        return note
 
     # endregion
 

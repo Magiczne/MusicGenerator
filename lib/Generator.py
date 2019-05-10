@@ -2,7 +2,6 @@ from typing import Dict, List, Optional, Tuple, Union
 import copy
 import termcolor
 import math
-import random
 import numpy as np
 
 from lib.theory.Interval import Interval
@@ -11,14 +10,16 @@ from lib.theory.Note import Note
 from lib.theory.Rest import Rest
 from lib.theory.Writeable import Writeable
 from lib.theory.NoteModifier import NoteModifier
+from lib.theory.RestModifier import RestModifier
 from lib.errors import InvalidBaseNoteDuration, NoNotesError, InvalidMetre, IntervalNotSupported, NoteOutsideAmbitus
 
 
 class Generator:
-    shortest_note_duration: int = 16
-
+    # Dozwolone wartości dla niektórych parametrów
     correct_note_lengths: List[int] = [2 ** i for i in range(7)]
     correct_metre_rhythmic_values: List[int] = [8, 4, 2]
+
+    shortest_note_duration: int = 16
 
     def __init__(self):
         # Parametry rytmu
@@ -35,9 +36,13 @@ class Generator:
         self.rest_probability: float = 0.5
         self.max_consecutive_rests = math.inf
 
-        # Parametry występowania interwałów i nut w obrębie oktawy
+        # Prawdopodobieństwa wystąpień
+        #   Interwałów
+        #   Nut w obrębie oktawy
+        #   Długości nut
         self.intervals_probability: List[int] = [8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
         self.notes_probability: List[int] = [9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8]
+        self.durations_probability: List[int] = [14, 14, 14, 14, 14, 15, 15]
 
         # Wygenerowane dane
         self.generated_data: List[Writeable] = []
@@ -250,6 +255,156 @@ class Generator:
 
         return self
 
+    def set_durations_probability(self, probabilities: List[int]):
+        """
+        Ustaw wartości prawdopodobieństwa wystąpienia dla wszystkich wartości rytmicznych. Muszą się sumować do 100
+
+        Args:
+            probabilities:  Lista prawdopodobieństw
+
+        Raises:
+            ValueError:     Jeśli prawdopodobieństwa nie sumują się do 100, lub jeśli długośc listy nie odpowiada
+                            ilości wszystkich dostępnych wartości rytmicznych
+        """
+        if len(probabilities) != len(Generator.correct_note_lengths):
+            raise ValueError('You have not specified probabilities for all durations')
+
+        if sum(probabilities) != 100:
+            raise ValueError('Probabilities does not sum to 100')
+
+        self.durations_probability = probabilities
+
+        return self
+
+    # endregion
+
+    # region Random generation
+
+    def get_random_duration(self, longest_duration: Optional[int] = None, uniform_distribution: bool = False):
+        """
+        Zwraca losową długość nuty na podstawie określonych prawdopodobieństw
+
+        Args:
+            longest_duration:       Najdłuższa możliwa wartośc rytmiczna, która może wystąpić podana w ilości
+                                    shortest_note_duration.
+                                    Jeśli nie podano, skrypt zakłada że nuta o każdej długości jest dozwolona.
+            uniform_distribution:   Jeśli prawda, każda długość ma identyczne prawdopodobieństwo wylosowania.
+                                    W przeciwnym wypadku pod uwagę brane jest pole prawdopodobieństwa
+        """
+        available = Generator.get_available_note_lengths(longest_duration=longest_duration)
+
+        if uniform_distribution:
+            return np.random.choice(available)
+        else:
+            start_idx = Generator.correct_note_lengths.index(available[0])
+
+            # Jako że wzięliśmy tylko fragment wystąpień, to musimy przeliczyć prawdopodobieństwa, tylko dla tych
+            # kilku wartości rytmicznych
+            p_available = self.durations_probability[start_idx:start_idx + len(available)]
+            p_sum = sum(p_available)
+            p = list(map(lambda dur: dur / p_sum, p_available))
+
+            return np.random.choice(available, p=p)
+
+    def get_random_note(self, longest_duration: Optional[int] = None) -> Note:
+        """
+        Wygeneruj nutę z losowymi parametrami o pewnej maksymalnej długości podanej w parametrze.
+
+        Args:
+            longest_duration:   Najdłuższa możliwa wartośc rytmiczna, która może wystąpić podana w ilości
+                                shortest_note_duration.
+                                Jeśli nie podano, skrypt zakłada że nuta o każdej długości jest dozwolona.
+
+        Returns:
+            Nuta z losowymi parametrami o maksymalnej długości wynoszącej longest_duration
+        """
+        # Jeśli nie był podany parametr najdłuższej możliwej wartości rytmicznej, to zakładamy że nuta o każdej długości
+        # jest dozwolona do wygenerowania
+        if longest_duration is None:
+            longest_duration = self.shortest_note_duration
+
+        available_mods = []
+
+        base_note = np.random.choice(Note.base_notes)
+        octave = OctaveType.random()
+        base_duration = self.get_random_duration(longest_duration=longest_duration)
+        has_mod = np.random.choice([True, False])
+
+        note = Note(note=base_note, octave=octave, base_duration=base_duration)
+
+        # Jeśli długość nuty jest najkrótsza jaką możemy uzyskać, to nie możemy dodać modyfikatora wydłużającego,
+        # gdyż kropka lub podwójna kropka doda mniejszą wartość rytmiczną
+        if base_duration >= self.shortest_note_duration:
+            has_mod = False
+
+        # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna nuta z kropką, to do dostępnych
+        # modyfikatorów możemy dodać przedłużenie w postaci kropki
+        if longest_duration >= note.get_duration(self.shortest_note_duration) * 1.5:
+            available_mods.append(NoteModifier.DOT)
+
+        # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna nuta z podwójną kropką, to do
+        # dostępnych modyfikatorów możemy dodać przedłużenie w postaci podwójnej kropki.
+        # Sprawdzamy również, czy nie jest to przedostatnia dostępna wartośc rytmiczna. Jeśli tak jest, to nie możemy
+        # dodać podwójnej kropki, gdyż skutkowałoby to dodaniem nuty o połowę mniejszej wartości rytmicznej niż
+        # dozwolona
+        if longest_duration >= note.get_duration(self.shortest_note_duration) * 1.75 \
+                and note.base_duration > 2 * self.shortest_note_duration:
+            available_mods.append(NoteModifier.DOUBLE_DOT)
+
+        if has_mod and len(available_mods) > 0:
+            note.add_modifier(np.random.choice(available_mods))
+
+        return note
+
+    def get_random_rest(self, longest_duration: Optional[int] = None) -> Rest:
+        """
+        Wygeneruj pauzę z losowymi parametrami o maksymalnej długości podanej w parametrze
+
+        Args:
+            longest_duration:   Najdłuższa możliwa wartośc rytmiczna, która może wystąpić podana w ilości
+                                shortest_note_duration.
+                                Jeśli nie podano, skrypt zakłada że nuta o każdej długości jest dozwolona.
+
+        Returns:
+            Pauza z losowymi parametrami o maksymalnej długości wynoszącej longest_duration
+        """
+        # Jeśli nie był podany parametr najdłuższej możliwej wartości rytmicznej, to zakładamy że nuta o każdej długości
+        # jest dozwolona do wygenerowania
+        if longest_duration is None:
+            longest_duration = self.shortest_note_duration
+
+        # Pobieramy listę dostępnych wartości rytmicznych i tworzymy listę dostępnych modyfikatorów
+        available_mods = []
+
+        base_duration = self.get_random_duration(longest_duration=longest_duration)
+        has_mod = np.random.choice([True, False])
+
+        rest = Rest(base_duration=base_duration)
+
+        # Jeśli długość nuty jest najkrótsza jaką możemy uzyskać, to nie możemy dodać modyfikatora wydłużającego,
+        # gdyż kropka lub podwójna kropka doda mniejszą wartość rytmiczną
+        if base_duration >= self.shortest_note_duration:
+            has_mod = False
+
+        # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna pauza z kropką, to do dostępnych
+        # modyfikatorów możemy dodać przedłużenie w postaci kropki
+        if longest_duration >= rest.get_duration(self.shortest_note_duration) * 1.5:
+            available_mods.append(RestModifier.DOT)
+
+        # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna pauza z podwójną kropką, to do
+        # dostępnych modyfikatorów możemy dodać przedłużenie w postaci podwójnej kropki.
+        # Sprawdzamy również, czy nie jest to przedostatnia dostępna wartośc rytmiczna. Jeśli tak jest, to nie możemy
+        # dodać podwójnej kropki, gdyż skutkowałoby to dodaniem pauzy o połowę mniejszej wartości rytmicznej niż
+        # dozwolona
+        if longest_duration >= rest.get_duration(self.shortest_note_duration) * 1.75 \
+                and rest.base_duration > 2 * self.shortest_note_duration:
+            available_mods.append(RestModifier.DOUBLE_DOT)
+
+        if has_mod and len(available_mods) > 0:
+            rest.add_modifier(np.random.choice(available_mods))
+
+        return rest
+
     # endregion
 
     # region Utility methods
@@ -272,7 +427,7 @@ class Generator:
 
         if generate_rest and self._consecutive_rests < self.max_consecutive_rests:
             self._consecutive_rests += 1
-            return Rest.random(longest_duration=longest_duration)
+            return self.get_random_rest(longest_duration=longest_duration)
         else:
             self._consecutive_rests = 0
 
@@ -310,7 +465,7 @@ class Generator:
                     elem = next_note_down
                     break
 
-            note_template = Note.random(longest_duration=longest_duration)
+            note_template = self.get_random_note(longest_duration=longest_duration)
             note_template.note = elem.note
             note_template.octave = elem.octave
 
@@ -502,7 +657,7 @@ class Generator:
 
         # Generujemy pierwszą nutę a następnie podmieniamy jej wysokość na tą, którą wybrał użytkownik wybierając
         # nutę początkową
-        start_note = Note.random(self.shortest_note_duration)
+        start_note = self.get_random_note(self.shortest_note_duration)
         start_note.note = self.start_note.note
         start_note.octave = self.start_note.octave
         self.generated_data.append(start_note)
