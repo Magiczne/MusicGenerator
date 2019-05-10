@@ -56,7 +56,7 @@ class Note(Writeable):
         return self.get_base_note_id() + OctaveType.get_id(self.octave) * 12 + self.get_accidentals_value()
 
     def get_accidentals(self) -> str:
-        """Pobierz znaki diaktrytyczne"""
+        """Pobierz znaki chromatyczne"""
         return self.note[1:]
 
     def get_accidentals_value(self) -> int:
@@ -89,13 +89,15 @@ class Note(Writeable):
     def __add__(self, other):
         if isinstance(other, Interval):
             # Find new base note according to the current note
-            new_base_note_idx = (self.base_notes_indexes[self.get_base_note()] + other.degrees - 1) % len(self.base_notes)
+            new_base_note_idx = (self.base_notes_indexes[self.get_base_note()] + other.degrees - 1) \
+                                % len(self.base_notes)
             new_base_note = self.base_notes[new_base_note_idx]
             new_base_note_id = self.base_notes_ids[new_base_note]
 
             new_id = self.get_id() + other.semitones
 
-            new_octave_id = OctaveType.get_id(self.octave) + int(self.get_base_note() in self.base_notes[8 - other.degrees:])
+            new_octave_id = OctaveType.get_id(self.octave) + \
+                            int(self.get_base_note() in self.base_notes[8 - other.degrees:])
             new_octave = OctaveType.from_id(new_octave_id)
 
             # Na podstawie naszego nowego ID wyliczamy pozycję naszej nuty w oktawie
@@ -202,7 +204,7 @@ class Note(Writeable):
 
     def get_duration(self, base_duration: int = 16) -> int:
         """
-        Pobierz długośc nuty wyrażoną w ilości base_duration
+        Pobierz długość nuty wyrażoną w ilości base_duration
 
         Args:
             base_duration:    Bazowa wartość rytmiczna, na podstawie której będą wykonywane obliczenia
@@ -245,7 +247,7 @@ class Note(Writeable):
             if NoteModifier.DOUBLE_DOT in self.modifiers:
                 self.modifiers.remove(NoteModifier.DOUBLE_DOT)
 
-        # Musimy mieć pewnośc że modyfikator przedłużenia nuty jest ostatni, więc aby to zrobić najpierw go usuwamy
+        # Musimy mieć pewność, że modyfikator przedłużenia nuty jest ostatni, więc aby to zrobić najpierw go usuwamy
         # a następnie dodajemy ponownie
         if NoteModifier.TIE in self.modifiers:
             self.modifiers.remove(NoteModifier.TIE)
@@ -276,4 +278,3 @@ class Note(Writeable):
             lower, higher = higher, lower
 
         return lower <= self <= higher
-

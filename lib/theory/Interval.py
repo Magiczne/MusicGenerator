@@ -60,6 +60,3 @@ class Interval:
         complement_degree = 9 - self.degrees
         complement_quality = self.interval_inversion[self.quality]
         return Interval(f'{complement_degree}{complement_quality}')
-
-
-

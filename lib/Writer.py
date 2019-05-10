@@ -94,7 +94,7 @@ class Writer:
 
     def header(self, paper_size: str = 'a4', show_bar_numbers: bool = True):
         """
-        Wygeneruj typowy nagłówek pliku lilyponda
+        Wygeneruj typowy nagłówek pliku lilypond
 
         Args:
             paper_size:         Rozmiar papieru
@@ -135,7 +135,7 @@ class Writer:
 
         Args:
             key:        Tonacja
-            key_type:   Rodzaj tonacji (molowa/durowa)
+            key_type:   Rodzaj tonacji (molowa / durowa)
             indent:     Rozmiar wcięcia
         """
         self.command('key {} \\{}'.format(key, key_type.value), indent)
@@ -146,7 +146,7 @@ class Writer:
 
     def set_source_dir(self, source_dir: str):
         """
-        Ustaw folder na pliki źródłowe lilyponda
+        Ustaw folder na pliki źródłowe lilypond
 
         Args:
             source_dir:     Ścieżka do folderu
@@ -163,7 +163,7 @@ class Writer:
         self.compiled_dir = compiled_dir.rstrip('/')
 
     def export(self):
-        """Wyeksportuj dane do pliku lilyponda"""
+        """Wyeksportuj dane do pliku lilypond"""
         if not os.path.isdir(self.source_dir):
             os.makedirs(self.source_dir, exist_ok=True)
 
@@ -192,7 +192,7 @@ class Writer:
 
     def parse(self, bars: List[List[Writeable]]):
         """
-        Parsuj i dodaj listę taktów
+        Przetwórz takty i dodaj je do danych wyjściowych
 
         Args:
             bars:   Lista taktów

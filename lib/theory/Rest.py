@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import List, Optional
-import random
 
 import lib
 from lib.theory.RestModifier import RestModifier
@@ -31,7 +30,7 @@ class Rest(Writeable):
 
     def get_duration(self, base_duration: int = 16) -> int:
         """
-        Pobierz długośc pauzy wyrażonej w ilości base_duration
+        Pobierz długość pauzy wyrażonej w ilości base_duration
 
         Args:
             base_duration:     Bazowa wartość rytmiczna, na podstawie której będą wykonywane obliczenia

@@ -59,7 +59,7 @@ class Generator:
         lib.Generator.shortest_note_duration
 
         Args:
-            longest_duration:   Najdłuższa możliwa wartośc rytmiczna, która może wystąpić podana w ilości
+            longest_duration:   Najdłuższa możliwa wartość rytmiczna, która może wystąpić podana w ilości
                                 lib.Generator.shortest_note_duration.
                                 Jeśli nie podano, skrypt zakłada że nuta o każdej długości jest dozwolona.
         """
@@ -221,7 +221,7 @@ class Generator:
             probabilities:  Lista prawdopodobieństw
 
         Raises:
-            ValueError:     Jeśli prawdopodobieństwa nie sumują się do 100, lub jeśli długośc listy nie odpowiada
+            ValueError:     Jeśli prawdopodobieństwa nie sumują się do 100, lub jeśli długość listy nie odpowiada
                             ilości wszystkich dostępnych interwałów
         """
         if len(probabilities) != len(Interval.names()):
@@ -242,8 +242,8 @@ class Generator:
              probabilities: Lista prawdopodobieństw
 
         Raises:
-            ValueError:     Jeśli prawdopodobieństwa nie sumują się do 100, lub jeśli długośc listy nie odpowiada
-                            ilości dźwieków dostępnych w ramach oktawy
+            ValueError:     Jeśli prawdopodobieństwa nie sumują się do 100, lub jeśli długość listy nie odpowiada
+                            ilości dźwięków dostępnych w ramach oktawy
         """
         if len(probabilities) != 12:
             raise ValueError('You have not specified probabilities for all notes')
@@ -263,7 +263,7 @@ class Generator:
             probabilities:  Lista prawdopodobieństw
 
         Raises:
-            ValueError:     Jeśli prawdopodobieństwa nie sumują się do 100, lub jeśli długośc listy nie odpowiada
+            ValueError:     Jeśli prawdopodobieństwa nie sumują się do 100, lub jeśli długość listy nie odpowiada
                             ilości wszystkich dostępnych wartości rytmicznych
         """
         if len(probabilities) != len(Generator.correct_note_lengths):
@@ -285,7 +285,7 @@ class Generator:
         Zwraca losową długość nuty na podstawie określonych prawdopodobieństw
 
         Args:
-            longest_duration:       Najdłuższa możliwa wartośc rytmiczna, która może wystąpić podana w ilości
+            longest_duration:       Najdłuższa możliwa wartość rytmiczna, która może wystąpić podana w ilości
                                     shortest_note_duration.
                                     Jeśli nie podano, skrypt zakłada że nuta o każdej długości jest dozwolona.
             uniform_distribution:   Jeśli prawda, każda długość ma identyczne prawdopodobieństwo wylosowania.
@@ -311,7 +311,7 @@ class Generator:
         Wygeneruj nutę z losowymi parametrami o pewnej maksymalnej długości podanej w parametrze.
 
         Args:
-            longest_duration:   Najdłuższa możliwa wartośc rytmiczna, która może wystąpić podana w ilości
+            longest_duration:   Najdłuższa możliwa wartość rytmiczna, która może wystąpić podana w ilości
                                 shortest_note_duration.
                                 Jeśli nie podano, skrypt zakłada że nuta o każdej długości jest dozwolona.
 
@@ -344,7 +344,7 @@ class Generator:
 
         # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna nuta z podwójną kropką, to do
         # dostępnych modyfikatorów możemy dodać przedłużenie w postaci podwójnej kropki.
-        # Sprawdzamy również, czy nie jest to przedostatnia dostępna wartośc rytmiczna. Jeśli tak jest, to nie możemy
+        # Sprawdzamy również, czy nie jest to przedostatnia dostępna wartość rytmiczna. Jeśli tak jest, to nie możemy
         # dodać podwójnej kropki, gdyż skutkowałoby to dodaniem nuty o połowę mniejszej wartości rytmicznej niż
         # dozwolona
         if longest_duration >= note.get_duration(self.shortest_note_duration) * 1.75 \
@@ -361,7 +361,7 @@ class Generator:
         Wygeneruj pauzę z losowymi parametrami o maksymalnej długości podanej w parametrze
 
         Args:
-            longest_duration:   Najdłuższa możliwa wartośc rytmiczna, która może wystąpić podana w ilości
+            longest_duration:   Najdłuższa możliwa wartość rytmiczna, która może wystąpić podana w ilości
                                 shortest_note_duration.
                                 Jeśli nie podano, skrypt zakłada że nuta o każdej długości jest dozwolona.
 
@@ -393,7 +393,7 @@ class Generator:
 
         # Jeśli dostępne miejsce jest większej lub równej długości niż potencjalna pauza z podwójną kropką, to do
         # dostępnych modyfikatorów możemy dodać przedłużenie w postaci podwójnej kropki.
-        # Sprawdzamy również, czy nie jest to przedostatnia dostępna wartośc rytmiczna. Jeśli tak jest, to nie możemy
+        # Sprawdzamy również, czy nie jest to przedostatnia dostępna wartość rytmiczna. Jeśli tak jest, to nie możemy
         # dodać podwójnej kropki, gdyż skutkowałoby to dodaniem pauzy o połowę mniejszej wartości rytmicznej niż
         # dozwolona
         if longest_duration >= rest.get_duration(self.shortest_note_duration) * 1.75 \
@@ -414,7 +414,7 @@ class Generator:
         Wygeneruj losowy element (nutę lub pauzę) ograniczony poprzez maksymalną wartość rytmiczną,
         która może wystąpić.
         UWAGA: Ta metoda będzie działać poprawnie tylko wtedy jeśli w kontenerze self.generated_data
-        znajduje się conajmniej jedna nuta!
+        znajduje się co najmniej jedna nuta!
 
         Args:
             longest_duration:       Najkrótsza możliwa do wystąpienia wartość rytmiczna, podana w ilości
@@ -449,7 +449,7 @@ class Generator:
 
                 if up_in_ambitus and down_in_ambitus:
                     # Jeśli obie z nut które zostały wygenerowane mieszczą się w ambitusie to korzystamy z
-                    # prawdopodobieństw wystąpienia dźwieków w ramach oktawy
+                    # prawdopodobieństw wystąpienia dźwięków w ramach oktawy
                     up_probability = self.notes_probability[next_note_up.get_id() % 12]
                     down_probability = self.notes_probability[next_note_down.get_id() % 12]
 
@@ -563,7 +563,7 @@ class Generator:
         Args:
             elem: Element do podziału
             first_duration: Długość miejsca pozostałego w pierwszym takcie, wyrażona za pomocą ilości nut o
-                            najmniejszej mdozwolonej wartości (shortest_note_duration)
+                            najmniejszej dozwolonej wartości (shortest_note_duration)
 
         Returns:
             Krotka dwuelementowa. Pierwszym elementem jest lista obiektów, która ma się pojawić w pierwszym takcie.
@@ -593,14 +593,11 @@ class Generator:
 
     def split_to_bars(self, notes: List[Writeable]) -> List[List[Writeable]]:
         """
-        Split given list of notes into bars. Notes that overlap between bars will be split
-        and then connected with a ligature.
+        Dzieli listę elementów na takty. Elementy które nachodzą na dwa takty będą podzielone, a jeśli są nutami,
+        to zostaną połączone łukiem
 
         Args:
-            notes:  List of notes
-
-        Returns:
-            List of bars of notes
+            notes:  Lista nut
         """
         notes_split: List[List[Writeable]] = [[] for _ in range(self.bar_count)]  # list of empty lists to fill
         value_to_fill = self.get_length_to_fill() / self.bar_count  # total value to fill in a bar
@@ -632,10 +629,7 @@ class Generator:
         Pogrupuj nuty w taktach zgodnie z zasadami grupowania
 
         Args:
-            bars:   Lista taktów do pogrupowania
-
-        Returns:
-            Pogrupowana lista taktów
+            bars:   Lista taktów do grupowania
         """
         # TODO: Implementacja grupowania nut wewnątrz taktów według zasad grupowania zależnie od metrum
         pass
@@ -652,7 +646,7 @@ class Generator:
         # Resetujemy wygenerowane dane
         self.generated_data = []
 
-        # Długośc którą mamy wygenerować podaną w ilości najkrótszej wartości rytmicznej, która może wystąpić
+        # Długość którą mamy wygenerować podaną w ilości najkrótszej wartości rytmicznej, która może wystąpić
         length_to_fill = self.get_length_to_fill()
 
         # Generujemy pierwszą nutę a następnie podmieniamy jej wysokość na tą, którą wybrał użytkownik wybierając
