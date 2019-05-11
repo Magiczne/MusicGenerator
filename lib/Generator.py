@@ -548,19 +548,33 @@ class Generator:
                 # przeliczenie jaka to nuta
                 closest_whole_base = self.shortest_note_duration // closest_whole
                 elem_2.base_duration = int(closest_whole_base)
-                divided.append(elem_2)
+                
                 # zmieniamy wartość pozostałą do wypełnienia
                 duration -= int(elem_2.get_duration(self.shortest_note_duration))
                 # sprawdzamy czy jakiś element został już wpisany do taktu i czy należy dodać do niego kropkę
                 # lub podwójną kropkę
-                if duration >= divided[-1].get_duration(self.shortest_note_duration) * 0.75:
-                    modifier_duration = divided[-1].get_duration(self.shortest_note_duration) * 0.75
-                    divided[-1].add_modifier(NoteModifier.DOUBLE_DOT)
+                if duration >= elem_2.get_duration(self.shortest_note_duration) * 0.75:
+                    modifier_duration = elem_2.get_duration(self.shortest_note_duration) * 0.75
                     duration -= int(modifier_duration)
-                elif duration >= divided[-1].get_duration(self.shortest_note_duration) * 0.5:
-                    modifier_duration = divided[-1].get_duration(self.shortest_note_duration) * 0.5
-                    divided[-1].add_modifier(NoteModifier.DOT)
+                   
+                    if isinstance(elem_2, Note):
+                        elem_2.add_modifier(NoteModifier.DOUBLE_DOT)
+                    
+                    if isinstance(elem_2, Rest):
+                        elem_2.add_modifier(RestModifier.DOUBLE_DOT)
+                    
+                elif duration >= elem_2.get_duration(self.shortest_note_duration) * 0.5:
+                    modifier_duration = elem_2.get_duration(self.shortest_note_duration) * 0.5
                     duration -= int(modifier_duration)
+
+                    if isinstance(elem_2, Note):
+                        elem_2.add_modifier(NoteModifier.DOT)
+                    
+                    if isinstance(elem_2, Rest):
+                        elem_2.add_modifier(RestModifier.DOT)    
+                    
+                
+                divided.append(elem_2)    
 
         return divided
 
