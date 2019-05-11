@@ -540,8 +540,8 @@ class GeneratorTests(unittest.TestCase):
             [Note('c', base_duration=2), Note('c', base_duration=2)],
             [Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), Note('c'), Note('c')],
             [
-                Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), Note('c', modifiers=[NoteModifier.TIE]),
-                Note('c', base_duration=8)
+                Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), 
+                Note('c', modifiers=[NoteModifier.DOT]), Note('c', base_duration=8)
             ],
             [
                 Note('c'), Note('c', base_duration=8), Note('c', base_duration=8, modifiers=[NoteModifier.TIE]),
@@ -661,7 +661,7 @@ class GeneratorTests(unittest.TestCase):
             ],
             [
                 Note('c', base_duration=2, modifiers=[NoteModifier.DOT]),
-                Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), Note('c', modifiers=[NoteModifier.TIE]),
+                Note('c', base_duration=2, modifiers=[NoteModifier.TIE]), Note('c', modifiers=[NoteModifier.DOT]),
                 Note('c', base_duration=8)
             ],
             [
