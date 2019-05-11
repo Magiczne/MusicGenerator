@@ -262,7 +262,9 @@ class Note(Writeable):
         Args:
             modifier:   Modyfikator do usunięcia
         """
-        self.modifiers.remove(modifier)
+        if modifier in self.modifiers:
+            self.modifiers.remove(modifier)
+
         return self
 
     def between(self, lower: Note, higher: Note) -> bool:
