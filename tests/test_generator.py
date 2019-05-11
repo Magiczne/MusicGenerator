@@ -316,6 +316,18 @@ class GeneratorTests(unittest.TestCase):
 
         self.assertEqual(expected, actual)
 
+    def test_split_note_long(self):
+        self.generator.set_shortest_note_duration(16)
+        note = Note('c', base_duration=1, modifiers=[NoteModifier.DOUBLE_DOT])
+
+        actual = self.generator.split_note(note, 16)
+        expected = (
+            [Note('c', base_duration=1, modifiers=[NoteModifier.TIE])],
+            [Note('c', base_duration=2, modifiers=[NoteModifier.DOT])]
+        )
+
+        self.assertEqual(expected, actual)
+
     def test_split_note_expects_dot(self):
         Generator.set_shortest_note_duration(16)
         note = Note('c', base_duration=4)
@@ -409,6 +421,20 @@ class GeneratorTests(unittest.TestCase):
         expected: List[List[Writeable]] = [
             [Note('c')] * 4,
             [Note('c'), Note('c'), Note('c'), Rest()]
+        ]
+
+        bars: List[List[Writeable]] = self.generator.split_to_bars(notes)
+
+        self.assertEqual(expected, bars)
+
+    def test_split_to_bars_long(self):
+        self.generator.set_bar_count(2)
+        self.generator.set_shortest_note_duration(16)
+        notes: List[Writeable] = [Note('c', base_duration=1, modifiers=[NoteModifier.DOUBLE_DOT]), Note('c')]
+
+        expected: List[List[Writeable]] = [
+            [Note('c', base_duration=1, modifiers=[NoteModifier.TIE])],
+            [Note('c', base_duration=2, modifiers=[NoteModifier.DOT]), Note('c')]
         ]
 
         bars: List[List[Writeable]] = self.generator.split_to_bars(notes)
