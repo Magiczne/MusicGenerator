@@ -520,13 +520,13 @@ class Generator:
         base_duration = self.shortest_note_duration / duration
         divided: List[Writeable] = []
 
-        # TODO: Buga znalazłem. Zakładasz że element jest nutą - co jeśli jest pauzą?
         if base_duration.is_integer():
-            if NoteModifier.DOT in elem.modifiers:
+            if isinstance(elem, Note):
                 elem.remove_modifier(NoteModifier.DOT)
-
-            if NoteModifier.DOUBLE_DOT in elem.modifiers:
                 elem.remove_modifier(NoteModifier.DOUBLE_DOT)
+            elif isinstance(elem, Rest):
+                elem.remove_modifier(RestModifier.DOT)
+                elem.remove_modifier(RestModifier.DOUBLE_DOT)
 
             elem.base_duration = int(base_duration)
             divided.append(elem)
@@ -534,6 +534,14 @@ class Generator:
         else:
             while duration > 0:
                 elem_2 = copy.deepcopy(elem)
+
+                if isinstance(elem_2, Note):
+                    elem_2.remove_modifier(NoteModifier.DOT)
+                    elem_2.remove_modifier(NoteModifier.DOUBLE_DOT)
+                elif isinstance(elem_2, Rest):
+                    elem_2.remove_modifier(RestModifier.DOT)
+                    elem_2.remove_modifier(RestModifier.DOUBLE_DOT)
+
                 # ile podstawowych długości zmieści się w takcie
                 closest_whole = max([val for val in Generator.correct_note_lengths if val <= duration])
                 # przeliczenie jaka to nuta
