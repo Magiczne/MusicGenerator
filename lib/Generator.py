@@ -620,6 +620,11 @@ class Generator:
             # Obliczamy długość naszego elementu wyrażonego w ilości shortest_note_duration
             note_duration = note.get_duration(self.shortest_note_duration)
 
+            # Jeśli w takcie skończyło się miejsce, to przeskakujemy do następnego
+            if value_to_fill == 0:
+                bar_nr += 1
+                value_to_fill = bar_length
+
             # Przypadek 1 - element mieści się w takcie
             # Dodajemy go do naszego taktu, a następnie od pozostałej wartości odejmujemy jego długość
             if note_duration <= value_to_fill:
@@ -638,11 +643,6 @@ class Generator:
                 value_to_fill = bar_length - value_filled
 
                 notes_split[bar_nr].extend(data[1])
-
-            # Jeśli w takcie skończyło się miejsce, to przeskakujemy do następnego
-            if value_to_fill == 0:
-                bar_nr += 1
-                value_to_fill = bar_length
 
         return notes_split
 
