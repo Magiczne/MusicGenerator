@@ -11,7 +11,7 @@ class Writeable(abc.ABC):
         super().__init__()
 
     @abc.abstractmethod
-    def get_duration(self, base_duration: int = 16) -> float:
+    def get_duration(self, base_duration: int = 16) -> int:
         """
         Pobierz długość nuty wyrażonej w ilości base_duration
 
