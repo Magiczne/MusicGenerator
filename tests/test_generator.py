@@ -527,6 +527,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(expected, grouped_bars)
 
     def test_group_bars_5_4(self):
+        self.generator.set_metre(5, 4)
         # Przyjmujemy założenie że 5/4 jest grupowane w sposób 3/4 + 2/4
         bars: List[List[Writeable]] = [
             [Note('c', base_duration=2, modifiers=[NoteModifier.DOT]), Note('c', base_duration=2)],
@@ -544,6 +545,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(expected, grouped_bars)
 
     def test_group_bars_6_4(self):
+        self.generator.set_metre(6, 4)
         bars: List[List[Writeable]] = [
             [Note('c', base_duration=2), Note('c', base_duration=2), Note('c', base_duration=2)],
             [Note('c', base_duration=1), Note('c', base_duration=2)],
@@ -580,6 +582,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(expected, grouped_bars)
 
     def test_group_bars_7_4(self):
+        self.generator.set_metre(7, 4)
         # Przyjmujemy założenie że 7/4 jest grupowane w sposób 3/4 + 2/4 + 2/4 = 3/4 + 4/4
         bars: List[List[Writeable]] = [
             [Note('c', base_duration=1), Note('c'), Note('c'), Note('c')],

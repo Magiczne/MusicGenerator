@@ -2,6 +2,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import copy
 import termcolor
 import math
+import itertools
 import numpy as np
 
 from lib.theory.Interval import Interval
@@ -631,8 +632,65 @@ class Generator:
         Args:
             bars:   Lista taktów do grupowania
         """
+        # 1) dostaje listę nut w takcie
+        # 2) sprawdzam jakie jest metrum
+        # 3) wyznaczam na jakie częsci muszę podzielić takt
+        # 4) dzielę nuty wykorzystując gotową funkcję dostając listę nut na każdą część
+        # 5) łączę listy w jedną tworzącą pogrupowany takt
+        
         # TODO: Implementacja grupowania nut wewnątrz taktów według zasad grupowania zależnie od metrum
-        pass
+        # dostajemy listę nut w takcie 
+        # w zależności od metrum czy podzielne przez 2 czy przez 3 to na tyle części zostanie podzielony takt
+        # np jeśli metrum będzie 4/4 to dzieli na dwie części po dwie ćwierćnuty 
+        # a np jeśli metrum będzie 6/4 to na dwie częsci po trzy ćwierćnuty 
+        # a jeśli 7/4 to np na 3, 2, 2
+        # zawsze złożone z 2 i 3 
+        bars_grouped: List[List[Writeable]] = [[] for _ in range(len(bars))]
+        bar_nr = 0
+        for bar in bars:
+            
+            if self.metre[0] % 2 == 0 and self.metre[0] % 3 != 0:
+                # # podział na części po 2 ćwierćnuty
+                # # ile szesnastek może zmieścić się w częsci taktu bez podziału (2 ćwierćnuty = 16 szesnastek)
+                bar_unit_duration = 8
+                bar_split: List[List[Writeable]] = [[] for _ in range(self.metre[0]//2)]  
+                value_to_fill = bar_unit_duration  
+                base_duration = self.shortest_note_duration
+                part_nr = 0  # number of currently filled bar
+                for note in bar:
+                    note_duration = note.get_duration(base_duration)
+                    if note_duration <= value_to_fill:  # how much of a bar will the note take
+                        bar_split[part_nr].append(note)
+                        value_to_fill -= note_duration
+                    elif value_to_fill == 0:
+                        part_nr += 1
+                        value_to_fill = (self.get_length_to_fill() / self.bar_count) - note_duration
+                        bar_split[part_nr].append(note)
+                    else:
+                        data: Tuple[List[Writeable], List[Writeable]] = self.split_note(note, value_to_fill)
+                        bar_split[part_nr].extend(data[0])
+                        part_nr += 1
+                        value_filled = 0
+                        for elem in data[1]:
+                            value_filled += elem.get_duration(self.shortest_note_duration)
+                        value_to_fill = (self.get_length_to_fill() / self.bar_count) - value_filled
+                        bar_split[part_nr] = data[1]
+                bar_grouped = []
+                for part in bar_split:
+                    for elem in part:
+                        bar_grouped.append(elem)
+                bars_grouped[bar_nr] = bar_grouped
+                print(bar_grouped)
+                bar_grouped = []
+                bar_nr += 1
+                print(bar_nr)
+            #else:
+                # podział napierw na tyle 3 ile się zmieści a póżniej na 2  
+                # TODO: reszta 
+
+            # bars_grouped.append(grouped_bar)
+
+        return bars_grouped        
 
     # endregion
 
