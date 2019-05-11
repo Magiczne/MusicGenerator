@@ -217,6 +217,8 @@ class Writer:
             bars:   Lista taktów
             indent:     Rozmiar wcięcia
         """
+        previous_clef = None
+
         for i, bar in enumerate(bars):
             elements = list(map(lambda elem: isinstance(elem, Note), bar))
 
@@ -229,8 +231,10 @@ class Writer:
                 assert isinstance(first_note, Note)
 
                 for clef, clef_range in self.clef_ranges.items():
-                    if first_note.between(clef_range[0], clef_range[1]):
+                    if first_note.between(clef_range[0], clef_range[1]) and previous_clef != clef:
                         self.clef(clef, indent=indent)
+
+                        previous_clef = clef
                         break
             except ValueError:
                 pass
