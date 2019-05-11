@@ -544,14 +544,13 @@ class Generator:
                 duration -= int(elem_2.get_duration(self.shortest_note_duration))
                 # sprawdzamy czy jakiś element został już wpisany do taktu i czy należy dodać do niego kropkę
                 # lub podwójną kropkę
-                if duration == divided[-1].get_duration(self.shortest_note_duration) * 0.5:
-                    modifier_duration = divided[-1].get_duration(self.shortest_note_duration) * 0.5
-                    divided[-1].add_modifier(NoteModifier.DOT)
-                    duration -= int(modifier_duration)
-
                 if duration >= divided[-1].get_duration(self.shortest_note_duration) * 0.75:
                     modifier_duration = divided[-1].get_duration(self.shortest_note_duration) * 0.75
                     divided[-1].add_modifier(NoteModifier.DOUBLE_DOT)
+                    duration -= int(modifier_duration)
+                elif duration >= divided[-1].get_duration(self.shortest_note_duration) * 0.5:
+                    modifier_duration = divided[-1].get_duration(self.shortest_note_duration) * 0.5
+                    divided[-1].add_modifier(NoteModifier.DOT)
                     duration -= int(modifier_duration)
 
         return divided
@@ -569,7 +568,6 @@ class Generator:
             Krotka dwuelementowa. Pierwszym elementem jest lista obiektów, która ma się pojawić w pierwszym takcie.
             Drugim elementem jest lista obiektów, która ma się pojawić w drugim takcie.
         """
-        # TODO: Tego samego buga masz tutaj
         second_duration = elem.get_duration(self.shortest_note_duration) - first_duration
         # kopiujemy parametry nuty aby móc później przypisać odpowiednią wartość do drugiego taktu
         elem_2 = copy.deepcopy(elem)
