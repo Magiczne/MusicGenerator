@@ -1,6 +1,7 @@
 from typing import List, Optional
 import os
 
+from lib.theory import Note, OctaveType
 from lib.BarType import BarType
 from lib.KeyType import KeyType
 from lib.theory.Writeable import Writeable
@@ -13,6 +14,14 @@ class Writer:
 
         self.source_dir = 'output/source'
         self.compiled_dir = 'output/compiled'
+
+        # Zakresy dla kluczy.
+        # Cały zakres nutowy [Note('c', OctaveType.DOUBLE_CONTRA), Note('b', OctaveType.LINE_6)] powinien być
+        # Obsłużony
+        self.clef_ranges = {
+            'F': (Note('c', OctaveType.DOUBLE_CONTRA), Note('f', OctaveType.SMALL)),
+            'G': (Note('fis', OctaveType.SMALL), Note('b', OctaveType.LINE_6))
+        }
 
     # region Data appending utils
 
@@ -140,6 +149,16 @@ class Writer:
         """
         self.command('key {} \\{}'.format(key, key_type.value), indent)
 
+    def clef(self, clef: str, indent: int = 0):
+        """
+        Dodaj klucz do danych wyjściowych
+
+        Args:
+            clef:   Rodzaj klucza
+            indent:     Rozmiar wcięcia
+        """
+        self.command(f'clef {clef}', indent)
+
     # endregion
 
     # region File operations
@@ -190,14 +209,32 @@ class Writer:
 
     # endregion
 
-    def parse(self, bars: List[List[Writeable]]):
+    def parse(self, bars: List[List[Writeable]], indent: int = 1):
         """
         Przetwórz takty i dodaj je do danych wyjściowych
 
         Args:
             bars:   Lista taktów
+            indent:     Rozmiar wcięcia
         """
         for i, bar in enumerate(bars):
+            elements = list(map(lambda elem: isinstance(elem, Note), bar))
+
+            # Jeśli takt zawiera jakąś nutę, to sprawdzamy, czy ta nuta się mieści w przedziałach dla kluczy
+            # i ustawiamy klucz na taki, który najbardziej pasuje
+            try:
+                first_note_idx = elements.index(True)
+                first_note = bar[first_note_idx]
+
+                assert isinstance(first_note, Note)
+
+                for clef, clef_range in self.clef_ranges.items():
+                    if first_note.between(clef_range[0], clef_range[1]):
+                        self.clef(clef, indent=indent)
+                        break
+            except ValueError:
+                pass
+
             notes = ' '.join([str(item) for item in bar])
             notes += ' |' if i != len(bars) - 1 else f' {self.get_bar(BarType.DOUBLE_NARROW_WIDE)}'
-            self.line(notes, indent=1)
+            self.line(notes, indent=indent)
