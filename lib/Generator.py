@@ -599,28 +599,43 @@ class Generator:
         Args:
             notes:  Lista nut
         """
-        notes_split: List[List[Writeable]] = [[] for _ in range(self.bar_count)]  # list of empty lists to fill
-        value_to_fill = self.get_length_to_fill() / self.bar_count  # total value to fill in a bar
-        base_duration = self.shortest_note_duration
-        bar_nr = 0  # number of currently filled bar
+        # Tworzymy listę pustych taktów do wypełnienia
+        notes_split: List[List[Writeable]] = [[] for _ in range(self.bar_count)]
+
+        # Obliczamy jaką długość ma każdy takt (w ilości shortest_note_duration)
+        bar_length = self.get_length_to_fill() // self.bar_count
+        value_to_fill = bar_length
+
+        # Numer aktualnie przetwarzanego taktu
+        bar_nr = 0
+
         for note in notes:
-            note_duration = note.get_duration(base_duration)
-            if note_duration <= value_to_fill:  # how much of a bar will the note take
+            # Obliczamy długość naszego elementu wyrażonego w ilości shortest_note_duration
+            note_duration = note.get_duration(self.shortest_note_duration)
+
+            # Przypadek 1 - element mieści się w takcie
+            # Dodajemy go do naszego taktu, a następnie od pozostałej wartości odejmujemy jego długość
+            if note_duration <= value_to_fill:
                 notes_split[bar_nr].append(note)
                 value_to_fill -= note_duration
-            elif value_to_fill == 0:
-                bar_nr += 1
-                value_to_fill = (self.get_length_to_fill() / self.bar_count) - note_duration
-                notes_split[bar_nr].append(note)
+
+            # Przypadek 2 - element nie mieści się w takcie
+            # Przekazujemy go do metody split_note, wraz z pozostałym miejscem w pierwszym takcie, aby został
+            # odpowiednio podzielony. Następnie pierwszą część dodajemy do pierwszego taktu, drugą do drugiego
             else:
                 data: Tuple[List[Writeable], List[Writeable]] = self.split_note(note, value_to_fill)
                 notes_split[bar_nr].extend(data[0])
+
                 bar_nr += 1
-                value_filled = 0
-                for elem in data[1]:
-                    value_filled += elem.get_duration(self.shortest_note_duration)
-                value_to_fill = (self.get_length_to_fill() / self.bar_count) - value_filled
-                notes_split[bar_nr] = data[1]
+                value_filled = sum([elem.get_duration(self.shortest_note_duration) for elem in data[1]])
+                value_to_fill = bar_length - value_filled
+
+                notes_split[bar_nr].extend(data[1])
+
+            # Jeśli w takcie skończyło się miejsce, to przeskakujemy do następnego
+            if value_to_fill == 0:
+                bar_nr += 1
+                value_to_fill = bar_length
 
         return notes_split
 
