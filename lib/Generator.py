@@ -17,7 +17,7 @@ from lib.errors import InvalidBaseNoteDuration, NoNotesError, InvalidMetre, Inte
 class Generator:
     # Dozwolone wartości dla niektórych parametrów
     correct_note_lengths: List[int] = [2 ** i for i in range(7)]
-    correct_metre_rhythmic_values: List[int] = [8, 4, 2]
+    correct_metre_rhythmic_values: List[int] = [16, 8, 4, 2]
 
     shortest_note_duration: int = 16
 
@@ -302,6 +302,10 @@ class Generator:
             # kilku wartości rytmicznych
             p_available = self.durations_probability[start_idx:start_idx + len(available)]
             p_sum = sum(p_available)
+
+            if p_sum == 0:
+                return self.get_random_duration(longest_duration, True)
+
             p = list(map(lambda dur: dur / p_sum, p_available))
 
             return np.random.choice(available, p=p)
