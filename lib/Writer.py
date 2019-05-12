@@ -244,11 +244,11 @@ class Writer:
             notes += ' |' if i != len(bars) - 1 else f' {self.get_bar(BarType.DOUBLE_NARROW_WIDE)}'
             self.line(notes, indent=indent)
 
-    def from_generator(self, generator: Generator, midi: bool = False):
+    def from_generator(self, generator: Generator, show_bar_numbers: bool = True, midi: bool = False):
         """Przetwórz dane z generatora"""
         self.lines = []
 
-        self.header()
+        self.header(show_bar_numbers=show_bar_numbers)
         self.block_start('score')
 
         self.block_start(indent=1)
@@ -256,8 +256,17 @@ class Writer:
         self.parse(generator.generate(group=True), indent=2)
         self.block_end(indent=1)
 
+        self.block_start('layout', indent=1)
+        self.block_end(indent=1)
+
         if midi:
             self.block_start('midi', indent=1)
+
+            self.block_start('context', indent=2)
+            self.command('Voice', indent=3)
+            self.command('remove "Dynamic_performer"', indent=3)
+            self.block_end(indent=2)
+
             self.block_end(indent=1)
 
         self.block_end()
