@@ -723,7 +723,10 @@ class Generator:
         parts = self.get_bar_parts()
         part_durations = [part * (self.shortest_note_duration // self.metre[1]) for part in parts]
 
-        for bar_idx, bar in enumerate(bars):
+        if len(parts) == 1:
+            return bars
+
+        for bar in bars:
             current_part = 0
             part_duration = part_durations[current_part]
 
@@ -748,7 +751,7 @@ class Generator:
                 # Przekazujemy go do metody split_note, wraz z pozostałym miejscem w pierwszej grupie, aby został
                 # odpowiednio podzielony. Następnie pierwszą część dodajemy do pierwszej grupy, drugą do drugiej
                 else:
-                    data: Tuple[List[Writeable], List[Writeable]] = self.split_note(elem, part_duration)
+                    data = self.split_note(elem, part_duration)
                     grouped_bar[current_part].extend(data[0])
 
                     current_part += 1
