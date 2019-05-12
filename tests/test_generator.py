@@ -520,18 +520,47 @@ class GeneratorTests(unittest.TestCase):
         bars: List[List[Writeable]] = self.generator.split_to_bars(data)
         self.assertEqual(expected, bars)
 
+    def test_split_to_bars_long_note(self):
+        self.generator.set_bar_count(3)
+
+        data: List[Writeable] = [
+            Rest(base_duration=2, modifiers=[RestModifier.DOT]),
+            Note('c', base_duration=1, modifiers=[NoteModifier.DOT]),
+            Rest(base_duration=2, modifiers=[RestModifier.DOT])
+        ]
+        expected: List[List[Writeable]] = [
+            [
+                Rest(base_duration=2, modifiers=[RestModifier.DOT]),
+                Note('c', base_duration=4, modifiers=[NoteModifier.TIE])
+            ],
+            [Note('c', base_duration=1, modifiers=[NoteModifier.TIE])],
+            [Note('c', base_duration=4), Rest(base_duration=2, modifiers=[RestModifier.DOT])]
+        ]
+
+        bars = self.generator.split_to_bars(data)
+        self.assertEqual(expected, bars)
+
     # endregion
 
     # region group_bars
 
     def test_group_bars_4_4(self):
+        self.generator.set_metre(4, 4)
+        self.generator.set_shortest_note_duration(16)
+
         bars: List[List[Writeable]] = [
             [Note('c', base_duration=1)],
             [Note('c'), Note('c', base_duration=2), Note('c')],
             [Note('c', base_duration=2), Note('c', base_duration=2)],
             [Note('c', base_duration=2, modifiers=[NoteModifier.DOT]), Note('c')],
             [Note('c', base_duration=2, modifiers=[NoteModifier.DOUBLE_DOT]), Note('c', base_duration=8)],
-            [Note('c'), Note('c', base_duration=8), Note('c', modifiers=[NoteModifier.DOT]), Note('c')]
+            [Note('c'), Note('c', base_duration=8), Note('c', modifiers=[NoteModifier.DOT]), Note('c')],
+            [
+                Rest(base_duration=8), Note('c', base_duration=8, modifiers=[NoteModifier.DOT]),
+                Note('c', base_duration=16), Note('c', base_duration=16),
+                Note('c', base_duration=8, modifiers=[NoteModifier.DOT]),
+                Rest(base_duration=4, modifiers=[RestModifier.DOT])
+            ]
         ]
 
         expected: List[List[Writeable]] = [
@@ -546,6 +575,12 @@ class GeneratorTests(unittest.TestCase):
             [
                 Note('c'), Note('c', base_duration=8), Note('c', base_duration=8, modifiers=[NoteModifier.TIE]),
                 Note('c'), Note('c')
+            ],
+            [
+                Rest(base_duration=8), Note('c', base_duration=8, modifiers=[NoteModifier.DOT]),
+                Note('c', base_duration=16), Note('c', base_duration=16),
+                Note('c', base_duration=16, modifiers=[NoteModifier.TIE]), Note('c', base_duration=8),
+                Rest(base_duration=4, modifiers=[RestModifier.DOT])
             ]
         ]
 
@@ -554,6 +589,8 @@ class GeneratorTests(unittest.TestCase):
 
     def test_group_bars_5_4(self):
         self.generator.set_metre(5, 4)
+        self.generator.set_shortest_note_duration(16)
+
         # Przyjmujemy założenie że 5/4 jest grupowane w sposób 3/4 + 2/4
         bars: List[List[Writeable]] = [
             [Note('c', base_duration=2, modifiers=[NoteModifier.DOT]), Note('c', base_duration=2)],
@@ -572,6 +609,8 @@ class GeneratorTests(unittest.TestCase):
 
     def test_group_bars_6_4(self):
         self.generator.set_metre(6, 4)
+        self.generator.set_shortest_note_duration(16)
+
         bars: List[List[Writeable]] = [
             [Note('c', base_duration=2), Note('c', base_duration=2), Note('c', base_duration=2)],
             [Note('c', base_duration=1), Note('c', base_duration=2)],
@@ -609,6 +648,8 @@ class GeneratorTests(unittest.TestCase):
 
     def test_group_bars_7_4(self):
         self.generator.set_metre(7, 4)
+        self.generator.set_shortest_note_duration(16)
+
         # Przyjmujemy założenie że 7/4 jest grupowane w sposób 3/4 + 2/4 + 2/4 = 3/4 + 4/4
         bars: List[List[Writeable]] = [
             [Note('c', base_duration=1), Note('c'), Note('c'), Note('c')],
