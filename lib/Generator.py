@@ -487,11 +487,15 @@ class Generator:
 
         raise NoNotesError
 
-    def get_length_to_fill(self) -> int:
+    def get_all_bars_duration(self) -> int:
         """
         Pobierz ile nut o bazowej wartości rytmicznej równej self.shortest_note_duration zmieści musimy wygenerować
         """
-        return self.bar_count * self.metre[0] * (self.shortest_note_duration // self.metre[1])
+        return self.bar_count * self.get_bar_duration()
+
+    def get_bar_duration(self) -> int:
+        """Pobierz jaką długośc ma takt, wyrażony w self.shortest_note_duration"""
+        return self.metre[0] * (self.shortest_note_duration // self.metre[1])
 
     def get_normalized_intervals_probability(self) -> List[float]:
         """

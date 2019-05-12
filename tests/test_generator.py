@@ -292,13 +292,13 @@ class GeneratorTests(unittest.TestCase):
         self.generator.set_bar_count(1)
         self.generator.set_metre(4, 4)
         self.generator.set_shortest_note_duration(4)
-        self.assertEqual(4, self.generator.get_length_to_fill())
+        self.assertEqual(4, self.generator.get_all_bars_duration())
 
         self.generator.set_bar_count(2)
-        self.assertEqual(8, self.generator.get_length_to_fill())
+        self.assertEqual(8, self.generator.get_all_bars_duration())
 
         self.generator.set_shortest_note_duration(8)
-        self.assertEqual(16, self.generator.get_length_to_fill())
+        self.assertEqual(16, self.generator.get_all_bars_duration())
 
     # endregion
 
@@ -745,7 +745,7 @@ class GeneratorTests(unittest.TestCase):
                 raise TypeError
 
             # Sprawdzenie długości każdej nuty
-            expected_length = self.generator.get_length_to_fill()
+            expected_length = self.generator.get_all_bars_duration()
             actual_length = sum([item.get_duration(self.generator.shortest_note_duration) for item in data])
             self.assertEqual(expected_length, actual_length)
 
@@ -758,7 +758,7 @@ class GeneratorTests(unittest.TestCase):
     def test_generate_group(self):
         data: List[List[Writeable]] = self.generator.generate(group=True)
 
-        expected_bar_length = self.generator.get_length_to_fill() / self.generator.bar_count
+        expected_bar_length = self.generator.get_all_bars_duration() / self.generator.bar_count
         for bar in data:
             actual_length = sum([item.get_duration(self.generator.shortest_note_duration) for item in bar])
             self.assertEqual(expected_bar_length, actual_length)
