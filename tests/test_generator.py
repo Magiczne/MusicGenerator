@@ -311,7 +311,8 @@ class GeneratorTests(unittest.TestCase):
         actual = self.generator.split_note(note, 2)
         expected = (
             [Note('c', base_duration=8, modifiers=[NoteModifier.TIE])],
-            [Note('c', base_duration=8)]
+            [Note('c', base_duration=8)],
+            []
         )
 
         self.assertEqual(expected, actual)
@@ -323,7 +324,8 @@ class GeneratorTests(unittest.TestCase):
         actual = self.generator.split_note(note, 16)
         expected = (
             [Note('c', base_duration=1, modifiers=[NoteModifier.TIE])],
-            [Note('c', base_duration=2, modifiers=[NoteModifier.DOT])]
+            [Note('c', base_duration=2, modifiers=[NoteModifier.DOT])],
+            []
         )
 
         self.assertEqual(expected, actual)
@@ -335,7 +337,8 @@ class GeneratorTests(unittest.TestCase):
         actual = self.generator.split_note(note, 3)
         expected = (
             [Note('c', base_duration=8, modifiers=[NoteModifier.DOT, NoteModifier.TIE])],
-            [Note('c', base_duration=16)]
+            [Note('c', base_duration=16)],
+            []
         )
 
         self.assertEqual(expected, actual)
@@ -347,7 +350,8 @@ class GeneratorTests(unittest.TestCase):
         actual = self.generator.split_note(note, 7)
         expected = (
             [Note('c', base_duration=4, modifiers=[NoteModifier.DOUBLE_DOT, NoteModifier.TIE])],
-            [Note('c', base_duration=16)]
+            [Note('c', base_duration=16)],
+            []
         )
 
         self.assertEqual(expected, actual)
@@ -362,7 +366,8 @@ class GeneratorTests(unittest.TestCase):
                 Note('c', base_duration=4, modifiers=[NoteModifier.TIE]),
                 Note('c', base_duration=16, modifiers=[NoteModifier.TIE])
             ],
-            [Note('c', base_duration=8, modifiers=[NoteModifier.DOT])]
+            [Note('c', base_duration=8, modifiers=[NoteModifier.DOT])],
+            []
         )
 
         self.assertEqual(expected, actual)
@@ -377,7 +382,8 @@ class GeneratorTests(unittest.TestCase):
             [
                 Note('c', base_duration=4, modifiers=[NoteModifier.TIE]),
                 Note('c', base_duration=16)
-            ]
+            ],
+            []
         )
 
         self.assertEqual(expected, actual)
@@ -392,7 +398,8 @@ class GeneratorTests(unittest.TestCase):
                 Note('c', base_duration=2, modifiers=[NoteModifier.DOUBLE_DOT, NoteModifier.TIE]),
                 Note('c', base_duration=16, modifiers=[NoteModifier.TIE])
             ],
-            [Note('c', base_duration=16)]
+            [Note('c', base_duration=16)],
+            []
         )
         self.assertEqual(expected, actual)
 
@@ -403,7 +410,8 @@ class GeneratorTests(unittest.TestCase):
         actual = self.generator.split_note(note, 3)
         expected = (
             [Rest(base_duration=8, modifiers=[RestModifier.DOT])],
-            [Rest(base_duration=4), Rest(base_duration=16)]
+            [Rest(base_duration=4), Rest(base_duration=16)],
+            []
         )
 
         self.assertEqual(expected, actual)

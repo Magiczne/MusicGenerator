@@ -578,7 +578,7 @@ class Generator:
 
         return divided
 
-    def split_note(self, elem: Writeable, first_duration: int) -> Tuple[List[Writeable], List[Writeable]]:
+    def split_note(self, elem: Writeable, first_duration: int) -> Tuple[List[Writeable], List[Writeable], List[Writeable]]:
         """
         Podział obiektu (nuty lub pauzy) na granicy kreski taktowej.
 
@@ -595,10 +595,22 @@ class Generator:
         has_tie = isinstance(elem, Note) and NoteModifier.TIE in elem.modifiers
 
         second_duration = elem.get_duration(self.shortest_note_duration) - first_duration
+        third_duration = 0
+
+        # Jeśli długość tego, co pozostało jest większa niż długość całego taktu, to trzeba obliczyć długość trzeciego
+        if second_duration > self.shortest_note_duration:
+            third_duration = second_duration - self.shortest_note_duration
+            second_duration = self.shortest_note_duration
+
         # kopiujemy parametry nuty aby móc później przypisać odpowiednią wartość do drugiego taktu
         elem_2 = copy.deepcopy(elem)
         first_bar: List[Writeable] = self.divide_element(elem, first_duration)
         second_bar: List[Writeable] = self.divide_element(elem_2, second_duration)
+
+        if third_duration > 0:
+            third_bar: List[Writeable] = self.divide_element(elem, third_duration)
+        else:
+            third_bar = []
 
         # jeśli elementy są nutami łączymy je łukami
         if isinstance(elem, Note):
@@ -610,13 +622,17 @@ class Generator:
                 assert isinstance(i, Note)
                 i.add_modifier(NoteModifier.TIE)
 
-            # usuwamy łuk z ostatniej nuty, ale tylko jeśli go nie było    
-            last_note = second_bar[-1]
+            # Usuwamy łuk z ostatniej nuty, ale tylko jeśli go nie było
+            if third_duration > 0:
+                last_note = third_bar[-1]
+            else:
+                last_note = second_bar[-1]
+
             assert isinstance(last_note, Note)
             if NoteModifier.TIE in last_note.modifiers and not has_tie:
                 last_note.remove_modifier(NoteModifier.TIE)
 
-        return first_bar, second_bar
+        return first_bar, second_bar, third_bar
 
     def split_to_bars(self, notes: List[Writeable]) -> List[List[Writeable]]:
         """
@@ -657,7 +673,7 @@ class Generator:
             # Przekazujemy go do metody split_note, wraz z pozostałym miejscem w pierwszym takcie, aby został
             # odpowiednio podzielony. Następnie pierwszą część dodajemy do pierwszego taktu, drugą do drugiego
             else:
-                data: Tuple[List[Writeable], List[Writeable]] = self.split_note(note, value_to_fill)
+                data: Tuple[List[Writeable], List[Writeable], List[Writeable]] = self.split_note(note, value_to_fill)
                 notes_split[bar_nr].extend(data[0])
 
                 bar_nr += 1
@@ -665,6 +681,12 @@ class Generator:
                 value_to_fill = bar_length - value_filled
 
                 notes_split[bar_nr].extend(data[1])
+
+                if len(data[2]) > 0:
+                    bar_nr += 1
+                    value_filled = sum([elem.get_duration(self.shortest_note_duration) for elem in data[2]])
+                    value_to_fill = bar_length - value_filled
+                    notes_split[bar_nr].extend(data[2])
 
         return notes_split
 
@@ -701,7 +723,7 @@ class Generator:
         parts = self.get_bar_parts()
         part_durations = [part * (self.shortest_note_duration // self.metre[1]) for part in parts]
 
-        for bar in bars:
+        for bar_idx, bar in enumerate(bars):
             current_part = 0
             part_duration = part_durations[current_part]
 
