@@ -2,7 +2,6 @@ from typing import Dict, List, Optional, Tuple, Union
 import copy
 import termcolor
 import math
-import itertools
 import numpy as np
 
 from lib.theory.Interval import Interval
@@ -518,6 +517,8 @@ class Generator:
         Returns:
             Lista nut mieszcząca się w takcie o podanej długości
         """
+        elem = copy.deepcopy(elem)
+
         base_duration = self.shortest_note_duration / duration
         divided: List[Writeable] = []
 
@@ -572,8 +573,7 @@ class Generator:
                     
                     if isinstance(elem_2, Rest):
                         elem_2.add_modifier(RestModifier.DOT)    
-                    
-                
+
                 divided.append(elem_2)    
 
         return divided
@@ -591,6 +591,7 @@ class Generator:
             Krotka dwuelementowa. Pierwszym elementem jest lista obiektów, która ma się pojawić w pierwszym takcie.
             Drugim elementem jest lista obiektów, która ma się pojawić w drugim takcie.
         """
+        elem = copy.deepcopy(elem)
         has_tie = isinstance(elem, Note) and NoteModifier.TIE in elem.modifiers
 
         second_duration = elem.get_duration(self.shortest_note_duration) - first_duration
@@ -625,6 +626,8 @@ class Generator:
         Args:
             notes:  Lista nut
         """
+        notes = copy.deepcopy(notes)
+
         # Tworzymy listę pustych taktów do wypełnienia
         notes_split: List[List[Writeable]] = [[] for _ in range(self.bar_count)]
 
@@ -692,6 +695,7 @@ class Generator:
         Args:
             bars:   Lista taktów do grupowania
         """
+        bars = copy.deepcopy(bars)
         bars_grouped: List[List[Writeable]] = []
 
         parts = self.get_bar_parts()
