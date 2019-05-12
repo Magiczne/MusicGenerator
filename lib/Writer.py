@@ -1,6 +1,7 @@
 from typing import List, Optional
 import os
 
+from lib import Generator
 from lib.theory import Note, OctaveType
 from lib.BarType import BarType
 from lib.KeyType import KeyType
@@ -242,3 +243,21 @@ class Writer:
             notes = ' '.join([str(item) for item in bar])
             notes += ' |' if i != len(bars) - 1 else f' {self.get_bar(BarType.DOUBLE_NARROW_WIDE)}'
             self.line(notes, indent=indent)
+
+    def from_generator(self, generator: Generator, midi: bool = False):
+        """Przetwórz dane z generatora"""
+        self.lines = []
+
+        self.header()
+        self.block_start('score')
+
+        self.block_start(indent=1)
+        self.time_signature(generator.metre[0], generator.metre[1], indent=2)
+        self.parse(generator.generate(group=True), indent=2)
+        self.block_end(indent=1)
+
+        if midi:
+            self.block_start('midi', indent=1)
+            self.block_end(indent=1)
+
+        self.block_end()
