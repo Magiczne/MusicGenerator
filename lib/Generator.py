@@ -715,7 +715,7 @@ class Generator:
         parts = self.get_bar_parts()
         part_durations = [part * (self.shortest_note_duration // self.metre[1]) for part in parts]
 
-        if len(parts) == 1:
+        if len(parts) == 1 or self.metre[0] == 1:
             return bars
 
         for bar in bars:
